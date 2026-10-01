@@ -1,0 +1,9 @@
+{
+  "name": "tuhaye-build-tests",
+  "private": true,
+  "type": "module",
+  "description": "Browser tests for the Theater 113 walkthrough (index.html at the repo root is built from src/app.html).",
+  "devDependencies": {
+    "playwright": "^1.47.0"
+  }
+}
