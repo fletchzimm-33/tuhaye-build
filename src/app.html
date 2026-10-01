@@ -1315,7 +1315,10 @@ function photoSample(p, cam, k, opt){ const W=p.w, H=p.h, E=cam.projectionMatrix
   const prev=p.acc[p.ping], next=p.acc[1-p.ping]; C.hasPrev.value=k>0?1:0; C.tPrev.value=prev.texture; C.w.value=1/(k+1); fsPass(SH.comp, next); p.ping=1-p.ping; p.n=k+1;
   cam.projectionMatrix.copy(_pm); }
 function photoShow(p, target){ SH.out.uniforms.t.value=p.acc[p.ping].texture; fsPass(SH.out, target||null); }
-function photoOverlay(cam){ if(!(selBox||guides.visible)) return; const mask=cam.layers.mask, ac=renderer.autoClear; cam.layers.set(1); renderer.autoClear=false; renderer.setRenderTarget(null); renderer.render(scene, cam); renderer.autoClear=ac; cam.layers.mask=mask; }
+/* selection outline and guides go on top of the finished picture. The scene's background colour is lifted for this pass because
+   three.js clears to a colour background even with autoClear off, which would wipe the picture and leave only the outline. */
+function photoOverlay(cam){ if(!(selBox||guides.visible)) return; const mask=cam.layers.mask, ac=renderer.autoClear, bg=scene.background; cam.layers.set(1); renderer.autoClear=false; scene.background=null;
+  try{ renderer.setRenderTarget(null); renderer.render(scene, cam); } finally{ scene.background=bg; renderer.autoClear=ac; cam.layers.mask=mask; } }
 /* returns true when there is more refining to do */
 function photoFrame(fresh){ const cam=camera, sz=renderer.getDrawingBufferSize(_sz); pipe.setSize(sz.x, sz.y);
   if(!PH.checked){ PH.checked=true; if(!pipeOk(pipe)){ pipe.dispose(); pipe=makePipe(false); pipe.setSize(sz.x, sz.y); if(!pipeOk(pipe)){ PH.broken=true; Q.photo=false; applyQuality(); renderer.render(scene,camera); return false; } } }
