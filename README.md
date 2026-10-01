@@ -3,7 +3,7 @@
 A to-scale 3D model of Theater 113 and the former Mech #2, built from sheet 8 of the plans (¼″ = 1′-0″).
 Walk through the room, move furniture, try TV sizes, floors, wall colors and lighting, and save layouts.
 
-**Live site:** https://tuhaye-build.vercel.app/ (if Vercel gives the project a different address, update `SITE_URL` in `src/app.html` and `SITE` in `scripts/build-site.py`, then rebuild)
+**Live site:** https://tuhaye-build-basement.vercel.app/ (if the address ever changes, update `SITE_URL` in `src/app.html` and `SITE` in `scripts/build-site.py`, then rebuild)
 
 ## What's here
 
