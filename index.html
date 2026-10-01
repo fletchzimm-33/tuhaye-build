@@ -9,8 +9,8 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Theater 113 walkthrough">
 <meta property="og:description" content="A to-scale 3D model of Theater 113: walk through the room, move furniture, try TV sizes, floors and lighting.">
-<meta property="og:url" content="https://tuhaye-build-basement.vercel.app/">
-<meta property="og:image" content="https://tuhaye-build-basement.vercel.app/preview.jpg">
+<meta property="og:url" content="https://tuhaye-build.vercel.app/">
+<meta property="og:image" content="https://tuhaye-build.vercel.app/preview.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -988,7 +988,7 @@ function load(){ loadSaved(); try{ const raw=localStorage.getItem(STORE); if(!ra
 function bootDefault(){ const d=DEFAULT_LAYOUT; S.items=JSON.parse(JSON.stringify(d.items)).filter(it=>it&&TYPES[it.type]).map(normalize).filter(Boolean); S.fin=mergeFin(S.fin,d.fin); S.cur={id:null, where:null, name:d.name, dirty:false}; S.boot=true; }
 if(!load()) bootDefault();
 /* layout links: "Send link" packs the layout into the address (#L=…), so it can be texted to anyone who opens the public page */
-const SITE_URL='https://tuhaye-build-basement.vercel.app/', IN_CLAUDE=!!(window.claude&&typeof window.claude.use==='function'); // the public copy; links made on the public site use its own address
+const SITE_URL='https://tuhaye-build.vercel.app/', IN_CLAUDE=!!(window.claude&&typeof window.claude.use==='function'); // the public copy; links made on the public site use its own address
 const b64u={ enc:str=>btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''), dec:str=>decodeURIComponent(escape(atob(str.replace(/-/g,'+').replace(/_/g,'/')))) };
 const rnd=v=>typeof v==='number'?Math.round(v*1e4)/1e4:v;
 function layoutLink(){ const pk={}; for(const k in PLAN) if(Math.abs(P[k]-PLAN[k])>1e-6) pk[k]=rnd(P[k]);
