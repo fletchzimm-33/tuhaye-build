@@ -143,7 +143,7 @@ let SHELL=[]; function shellAt(x,z){ return SHELL.some(r=>inRect(r,x,z,.02)); }
 
 /* ---------- walls ---------- */
 const CIRC=/hall|stair|vestibule|lobby|landing/i;
-function extMat(L,w){ if(w&&(w.k==='c'||w.k==='p')) return HM.stone; const e=w&&w.o&&w.o.ext; return e==='stone'?HM.stone:e==='vsiding'?HM.vsiding:HM.siding; }
+function extMat(L,w){ const e=w&&w.o&&w.o.ext; if(w&&(w.k==='c'||w.k==='p')&&!e) return HM.stone; return e==='stone'?HM.stone:e==='vsiding'?HM.vsiding:HM.siding; }
 /* what a wall face looks onto decides its finish: a room gets paint, the outside gets siding or stone */
 function sideMat(L,px,pz,ext){ if(roomAt(L,px,pz)) return HM.paint; if(openAt(L,px,pz)||wallAt(L,px,pz)) return HM.paint; if(L.key==='L'&&POLY.length&&inPoly(px,pz,POLY)) return HM.paint; return ext; }
 function topFor(L,x,z,bx,bz,half){ // wall top: lower walls are cut at CUT; main walls reach the higher ceiling on either side (or the roof underside)
@@ -181,7 +181,7 @@ function buildWalls(L,B){ const main=L.key==='M';
     prism(B,L,w.x0,w.z0,w.x1,w.z1,y0,topF,ext,{band, base:true, bot:main?HM.soffit:null}); });
   L.walls.forEach(w=>{ const yb=main?(YM+(roomAt(L,(w.x0+w.x1)/2,(w.z0+w.z1)/2+2)||{dy:0}).dy):L.y;
     if(w.k==='g') glassWall(B,w,yb+.0,yb+(w.o.h||7.5));
-    if(w.k==='p'){ let top=w.o.top!=null?w.o.top-6766.5:yb+9; if(CUTM!=null) top=Math.min(top,CUTM); hbox(B,HM.stone,w.x0,main?CUT:L.y,w.z0,w.x1,top,w.z1); hbox(B,HM.fascia,w.x0-.15,top,w.z0-.15,w.x1+.15,top+.25,w.z1+.15); }
+    if(w.k==='p'){ let top=w.o.top!=null?w.o.top-6766.5:yb+9; if(CUTM!=null) top=Math.min(top,CUTM); hbox(B,extMat(L,w),w.x0,main?CUT:L.y,w.z0,w.x1,top,w.z1); hbox(B,HM.fascia,w.x0-.15,top,w.z0-.15,w.x1+.15,top+.25,w.z1+.15); }
     if(w.k==='v'){ hbox(B,{px:HM.stone,nx:HM.stone,pz:HM.stone,nz:HM.stone,py:HM.cap,ny:null},w.x0,L.y,w.z0,w.x1,L.y+9,w.z1); firebox(B,{x0:sX(22.8),x1:sX(27.7),z:w.z0,dir:-1,ax:'x',y:L.y+1.6,h:1.1}); } // the linear fireplace, TV above
     if(w.k==='fp') fireplace(B,L,w); }); }
 function glassWall(B,w,y0,y1){ const ax=(w.x1-w.x0)>=(w.z1-w.z0), m=(w.x0+w.x1)/2, n=(w.z0+w.z1)/2;
@@ -205,7 +205,8 @@ function voidsOf(L,o){ const t=o.t, oo=o.o, dy=Math.max(...[-1,1].map(s=>{ const
   if(t==='win'){ const sill=oo.sill!=null?oo.sill:2.0, head=oo.head!=null?oo.head:8.0; return {fl, v:[[fl+sill,CUTM!=null?Math.min(fl+head,CUTM-.05):fl+head]]}; }
   const h=oo.h||(t==='garage'?8.5:t==='slide'?8:t==='gdoor'?7.3:7.0), v=[[fl,fl+h]]; if(oo.tr&&(CUTM==null||fl+oo.tr[0]<CUTM-.2)) v.push([fl+oo.tr[0],CUTM!=null?Math.min(fl+oo.tr[1],CUTM):fl+oo.tr[1]]); return {fl, v}; }
 function buildOpenings(L,B){ const main=L.key==='M';
-  L.opens.forEach(o=>{ const ax=(o.x1-o.x0)>=(o.z1-o.z0), half=Math.min(o.x1-o.x0,o.z1-o.z0)/2, wref=wallAt(L,ax?o.x0-.05:(o.x0+o.x1)/2,ax?(o.z0+o.z1)/2:o.z0-.05)||wallAt(L,ax?o.x1+.05:(o.x0+o.x1)/2,ax?(o.z0+o.z1)/2:o.z1+.05);
+  const plain=w=>w&&(w.k==='w'||w.k==='c')?w:null; // the wall an opening sits in (not a pier or fireplace beside it)
+  L.opens.forEach(o=>{ const ax=(o.x1-o.x0)>=(o.z1-o.z0), half=Math.min(o.x1-o.x0,o.z1-o.z0)/2, wref=plain(wallAt(L,ax?o.x0-.05:(o.x0+o.x1)/2,ax?(o.z0+o.z1)/2:o.z0-.05))||plain(wallAt(L,ax?o.x1+.05:(o.x0+o.x1)/2,ax?(o.z0+o.z1)/2:o.z1+.05));
     const ext=extMat(L,wref), y0=main?CUT:L.y, {fl,v}=voidsOf(L,o), topF=(x,z)=>topFor(L,x,z,ax?0:1,ax?1:0,half);
     let cur=y0; v.forEach(([lo,hi])=>{ if(lo>cur+.01) prism(B,L,o.x0,o.z0,o.x1,o.z1,cur,lo,ext,{noEnds:true, base:o.t==='win', cap:HM.trim}); cur=hi; });
     prism(B,L,o.x0,o.z0,o.x1,o.z1,cur,topF,ext,{noEnds:true, bot:HM.paint});
@@ -296,7 +297,8 @@ function buildDecks(B){ HOUSE.decks.forEach(d=>{ const p=d.poly.map(([X,Z])=>[sX
       quadF(B,HM.fascia,[a[0],d.y-1,a[1]],[b[0],d.y-1,b[1]],[b[0],d.y+.02,b[1]],[a[0],d.y+.02,a[1]],[nx*out,0,nz*out]);
       const px=mx+nx*out*.6, pz=mz+nz*out*.6, against=roomAt(HL.M,px,pz)||wallAt(HL.M,px,pz)||openAt(HL.M,px,pz)||HOUSE.chim.some(c=>inRect({x0:sX(c.r[0]),x1:sX(c.r[1]),z0:sZ(c.r[2]),z1:sZ(c.r[3])},px,pz,.3));
       const want=d.rail==='auto'?!against:[...(d.rail||'')].some(ch=>({W:dx===0&&nx*out<0,E:dx===0&&nx*out>0,N:dz===0&&nz*out<0,S:dz===0&&nz*out>0})[ch]);
-      if(want){ const ix=-nx*out*.15, iz=-nz*out*.15; rail(B,a[0]+ix,a[1]+iz,b[0]+ix,b[1]+iz,d.y,d.y); } }); }); }
+      if(want){ const ix=-nx*out*.15, iz=-nz*out*.15; if(d.screen){ const p0=[a[0]+ix,a[1]+iz], p1=[b[0]+ix,b[1]+iz]; quadF(B,HM.roofZ,[p0[0],d.y,p0[1]],[p1[0],d.y,p1[1]],[p1[0],d.y+4,p1[1]],[p0[0],d.y+4,p0[1]],[nx*out,0,nz*out]); quadF(B,HM.roofZ,[p0[0],d.y,p0[1]],[p1[0],d.y,p1[1]],[p1[0],d.y+4,p1[1]],[p0[0],d.y+4,p0[1]],[-nx*out,0,-nz*out]); hbox(B,HM.fascia,Math.min(p0[0],p1[0])-.08,d.y+4,Math.min(p0[1],p1[1])-.08,Math.max(p0[0],p1[0])+.08,d.y+4.15,Math.max(p0[1],p1[1])+.08); }
+        else rail(B,a[0]+ix,a[1]+iz,b[0]+ix,b[1]+iz,d.y,d.y); } }); }); }
 function buildSite(Bl,Bm){ const P=a=>a.map(([X,Z])=>[sX(X),sZ(Z)]), R=r=>({x0:sX(r[0]),x1:sX(r[1]),z0:sZ(r[2]),z1:sZ(r[3])});
   HOUSE.ter.forEach(t=>{ const p=P(t.poly); hpoly(Bl,HM.pavers,p,t.y,1); p.forEach((a,i)=>{ const b=p[(i+1)%p.length], dx=b[0]-a[0], dz=b[1]-a[1], l=Math.hypot(dx,dz), nx=dz/l, nz=-dx/l, mx=(a[0]+b[0])/2, mz=(a[1]+b[1])/2, out=inPoly(mx+nx*.1,mz+nz*.1,p)?-1:1;
     quadF(Bl,HM.stone,[a[0],t.y-3,a[1]],[b[0],t.y-3,b[1]],[b[0],t.y,b[1]],[a[0],t.y,a[1]],[nx*out,0,nz*out]); }); });
@@ -370,6 +372,9 @@ function buildShell(){ [HG.shell,HG.shellUp].forEach(g=>{ g.traverse(o=>{ if(o.g
     const mx=(e.a[0]+e.b[0])/2-e.n[0]*(t+.4), mz=(e.a[1]+e.b[1])/2-e.n[1]*(t+.4); if(!roomAt(HL.L,mx,mz)&&!roomAt(HL.M,mx,mz)){ const a=[e.a[0]+ox,e.a[1]+oz], b=[e.b[0]+ox,e.b[1]+oz]; quadF(Bu,HM.stone,[a[0],top,a[1]],[b[0],top,b[1]],[b[0],YM+2,b[1]],[a[0],YM+2,a[1]],[-e.n[0],0,-e.n[1]]); } });
   POLY.forEach((v,i)=>{ const ein=EDGES.find(e=>e.b===v), eout=EDGES.find(e=>e.a===v); if(!ein||!eout) return; const ti=thick(ein), to=thick(eout), c=[v[0]-(ein.n[0]*ti+eout.n[0]*to), v[1]-(ein.n[1]*ti+eout.n[1]*to)];
     if(inPoly(v[0]+(ein.n[0]-eout.n[0])*.05, v[1]+(ein.n[1]-eout.n[1])*.05, POLY)) return; /* only outside corners need filling */ const r={x0:Math.min(v[0],c[0]),x1:Math.max(v[0],c[0]),z0:Math.min(v[1],c[1]),z1:Math.max(v[1],c[1])}; if(r.x1-r.x0<.01||r.z1-r.z0<.01) return; SHELL.push(r); piece(r.x0,r.z0,r.x1,r.z1,0,top); });
+  { const x0=sX(40.2), x1=sX(42.6), z=SHELL.reduce((m,r)=>r.x0<=x0+.1&&r.x1>=x1-.1&&r.z1>sZ(117)?Math.max(m,r.z1):m,-1e9); if(z>-1e8){ const y0=4.9, y1=9.25, f=.16, zz=z+.02;
+      quadF(B,HM.firebox,[x0,y0,zz],[x1,y0,zz],[x1,y1,zz],[x0,y1,zz],[0,0,1]); quadF(B,HM.glass,[x0,y0,zz+.03],[x1,y0,zz+.03],[x1,y1,zz+.03],[x0,y1,zz+.03],[0,0,1]);
+      [[x0,y0,x0+f,y1],[x1-f,y0,x1,y1],[x0,y0,x1,y0+f],[x0,y1-f,x1,y1],[(x0+x1)/2-.06,y0,(x0+x1)/2+.06,y1]].forEach(([a,b,c,d])=>hbox(B,HM.frame,a,b,zz,c,d,zz+.12)); hbox(B,HM.beam,x0-.6,y1+.05,zz,x1+.6,y1+.75,zz+.5); } } // egress window 43b, timber lintel
   flush(B,HG.shell,{pick:true}); flush(Bu,HG.shellUp); }
 
 /* ---------- which parts show: the whole house, one level, or the theater on its own ---------- */

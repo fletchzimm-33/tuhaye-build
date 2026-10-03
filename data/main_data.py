@@ -125,7 +125,7 @@ W=[
  (56.01,92.5,56.47,96.42,'w'),
  (56.01,99.58,56.47,117.05,'w'),
  (56.47,92.08,59.0,92.58,'w',dict(ext='vsiding')),         # garage north (door 203)
- (69.5,88.4,71.6,92.58,'p',dict(top=6792.5)),  # stone pier + steel column between the doors
+ (69.5,88.4,71.6,92.58,'p',dict(top=6792.5,ext='vsiding')),  # stone pier + steel column between the doors
  (89.6,90.58,91.58,91.08,'w',dict(ext='vsiding')),          # (door 202 east jamb)
  (91.58,89.0,92.0,94.08,'w',dict(ext='vsiding')),           # meter wall
  (92.0,93.5,96.5,94.08,'w',dict(ext='vsiding')),            # refuse north
@@ -196,12 +196,12 @@ O=[
  ('door',47.2,105.58,47.65,111.83,dict(tag='207',h=8,swing=1,hinge=1,pair=True)),
  ('door',56.01,96.42,56.47,99.58,dict(tag='204',h=8,swing=1,hinge=0)),
  ('bifold',53.5,106.25,56.0,112.0,dict()),
- ('garage',59.0,92.08,69.5,92.58,dict(tag='203',h=8.5)),
- ('garage',71.6,90.58,89.6,91.08,dict(tag='202',h=8.5)),
+ ('garage',59.0,92.08,69.5,92.58,dict(tag='203',h=8.75)),
+ ('garage',71.6,90.58,89.6,91.08,dict(tag='202',h=8.75)),
  ('door',91.58,94.08,92.0,97.33,dict(tag='201',h=7,swing=1,hinge=0)),
  ('door2',96.92,93.5,101.5,94.08,dict(tag='200',h=7)),
- ('win',58.0,116.83,64.2,117.5,dict(tag='32',sill=4.0,head=8.8)),
- ('win',66.6,116.83,69.0,117.5,dict(tag='33',sill=4.0,head=8.8)),
+ ('win',58.0,116.83,64.2,117.5,dict(tag='32',sill=4.3,head=9.0)),
+ ('win',66.6,116.83,69.0,117.5,dict(tag='33',sill=4.3,head=9.0)),
 ]
 # rooms (interior faces).  fl = floor finish, dy = floor offset above the level (mudroom/laundry/garage +2.5)
 R=[
