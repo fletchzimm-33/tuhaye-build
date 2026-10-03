@@ -549,6 +549,8 @@ const HOUSE_FURN=[
 ];
 const theaterPoly=()=>POLY.length?POLY:roomPoly(P);
 const isHouseItem=it=>fyOf(it)>.01||!inPoly(it.x,it.z,theaterPoly());
+/* a layout with only theater furniture gets the rest of the house from the default layout (Layout 1), or the plan furniture if that has none */
 function withHouse(list){ if(list.some(isHouseItem)) return list; let mx=Math.max(idSeq-1,0,...list.map(i=>i.id||0)); const keep=idSeq;
-  const add=HOUSE_FURN.map(([t,X,Z,r,fy,o])=>{ if(!TYPES[t]) return null; const it=mk(t,sX(X),sZ(Z),r,o||{}); it.id=++mx; if(fy) it.fy=fy; return it; }).filter(Boolean);
-  idSeq=Math.max(keep,mx+1); resnapWallItems(add); return list.concat(add); }
+  let add=DEFAULT_LAYOUT.items.filter(isHouseItem).map(it=>JSON.parse(JSON.stringify(it))).filter(it=>TYPES[it.type]).map(normalize).filter(Boolean);
+  if(!add.length) add=HOUSE_FURN.map(([t,X,Z,r,fy,o])=>{ if(!TYPES[t]) return null; const it=mk(t,sX(X),sZ(Z),r,o||{}); if(fy) it.fy=fy; return it; }).filter(Boolean);
+  add.forEach(it=>it.id=++mx); idSeq=Math.max(keep,mx+1); resnapWallItems(add); return list.concat(add); }

@@ -21,7 +21,7 @@ page.on('console', m=>{ if(m.type()==='error'||m.type()==='warning') errs.push(m
 await page.route('**/three.min.js', r=>r.fulfill({body:three, contentType:'application/javascript'}));
 await page.route('https://fonts.googleapis.com/**', r=>r.fulfill({body:'', contentType:'text/css'}));
 await page.route('https://fonts.gstatic.com/**', r=>r.abort());
-await page.goto('file://'+process.cwd()+'/wrapped6.html'); await page.evaluate(()=>{ localStorage.clear(); localStorage.setItem('theater113-help-seen','1'); localStorage.setItem('tuhaye-focus','theater'); }); await page.reload(); await page.waitForTimeout(1200);
+await page.goto('file://'+process.cwd()+'/wrapped6.html'); await page.evaluate(()=>{ localStorage.clear(); localStorage.setItem('theater113-help-seen','1'); localStorage.setItem('tuhaye-focus','theater'); sessionStorage.setItem('tuhaye-edit','1'); }); await page.reload(); await page.waitForTimeout(1200);
 const tag=`${scheme}-${vw}x${vh}`; let n=0; const log=(...a)=>console.log(tag,...a);
 const shot=async name=>{ await page.waitForTimeout(500); await page.screenshot({path:`m-${tag}-${String(n++).padStart(2,'0')}-${name}.png`}); };
 // touch helper: drag path with synthetic touch pointer events on an element (default canvas)

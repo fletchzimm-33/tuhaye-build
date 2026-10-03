@@ -26,7 +26,7 @@ await page.route('**/three.min.js', r=>r.fulfill({body:three, contentType:'appli
 await page.route('https://fonts.googleapis.com/**', r=>r.fulfill({body:'', contentType:'text/css'}));
 await page.goto('file://'+process.cwd()+'/wrapped8.html'); await page.waitForTimeout(600);
 // seed an OLD v2 save (three slots; A modified) to test the upgrade path
-await page.evaluate(()=>{ const its=__t.items().map(i=>({...i})); its[3].x+=3; localStorage.clear(); localStorage.setItem('theater113-help-seen','1'); localStorage.setItem('tuhaye-focus','theater'); localStorage.setItem('theater113-walkthrough-v1', JSON.stringify({v:2, slot:'A', layouts:{A:its, B:[], C:[]}, fin:{floor:0,wall:1,ceil:0}, light:'bright'})); });
+await page.evaluate(()=>{ const its=__t.items().map(i=>({...i})); its[3].x+=3; localStorage.clear(); localStorage.setItem('theater113-help-seen','1'); localStorage.setItem('tuhaye-focus','theater'); sessionStorage.setItem('tuhaye-edit','1'); localStorage.setItem('theater113-walkthrough-v1', JSON.stringify({v:2, slot:'A', layouts:{A:its, B:[], C:[]}, fin:{floor:0,wall:1,ceil:0}, light:'bright'})); });
 await page.reload(); await page.waitForTimeout(1300);
 const openL=async()=>{ if(await page.evaluate(()=>document.getElementById('sLayout').hidden)) await page.click('#tLayout'); await page.waitForTimeout(250); };
 const log=(...a)=>console.log(mode, ...a); let n=0; const shot=async nm=>{ await page.waitForTimeout(500); await page.screenshot({path:`sv-${mode}-${n++}-${nm}.png`}); };

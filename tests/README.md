@@ -13,6 +13,7 @@ node saved-layouts.mjs local    # and: cloud
 node default-layout.mjs
 node graphics-modes.mjs light   # and: dark
 node house.mjs                  # the whole house: stairs, walls, doorways, furniture on both levels
+node edit-lock.mjs              # furniture stays put until Edit furniture is on
 node screenshots.mjs look       # renders views to out/
 ```
 
