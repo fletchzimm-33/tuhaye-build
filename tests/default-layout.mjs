@@ -9,7 +9,7 @@ const { chromium } = await import(process.env.PLAYWRIGHT || 'playwright');
 const CHROMIUM=process.env.CHROMIUM || undefined;
 fs.mkdirSync(OUT,{recursive:true}); process.chdir(OUT); // wrapped pages and screenshots land in tests/out
 let body = fs.readFileSync(APP,'utf8');
-const hook = `window.__t={items, S, Cloud, DEFAULT_LAYOUT};\n`;
+const hook = `window.__t={items, S, Cloud, DEFAULT_LAYOUT, houseItem:it=>isHouseItem(it)};\n`;
 body = body.replace('requestAnimationFrame(loop);\n})();', hook+'requestAnimationFrame(loop);\n})();');
 const D = JSON.parse(fs.readFileSync(path.join(HERE,'fixtures','default.json'),'utf8'));
 // fake db with several collections and document listeners; seed comes from window.__seed (set per scenario before load)
@@ -32,8 +32,8 @@ await page.route('https://fonts.googleapis.com/**', r=>r.fulfill({body:'', conte
 await page.goto('file://'+process.cwd()+'/wrapped9.html'); await page.waitForTimeout(300);
 const fl = {name:D.name, items:D.items, fin:D.fin, count:D.items.length, thumb:null, createdAt:1, updatedAt:D.updatedAt};
 const other = {name:'Recliner plan', items:D.items.slice(0,5), fin:{floor:2,wall:3,ceil:0}, count:5, thumb:null, createdAt:2, updatedAt:D.updatedAt+500};
-const state = async()=>page.evaluate(()=>({cur:__t.S.cur, n:__t.items().length, fin:__t.S.fin, boot:!!__t.S.boot}));
-const run = async(name, seed, store, check)=>{ await page.evaluate(([s,st])=>{ localStorage.clear(); localStorage.setItem('theater113-help-seen','1'); localStorage.setItem('__seed', JSON.stringify(s)); if(st) localStorage.setItem('theater113-walkthrough-v1', JSON.stringify(st)); }, [seed, store]);
+const state = async()=>page.evaluate(()=>({cur:__t.S.cur, n:__t.items().filter(i=>!__t.houseItem(i)).length, fin:__t.S.fin, boot:!!__t.S.boot}));
+const run = async(name, seed, store, check)=>{ await page.evaluate(([s,st])=>{ localStorage.clear(); localStorage.setItem('theater113-help-seen','1'); localStorage.setItem('tuhaye-focus','theater'); localStorage.setItem('__seed', JSON.stringify(s)); if(st) localStorage.setItem('theater113-walkthrough-v1', JSON.stringify(st)); }, [seed, store]);
   await page.reload(); await page.waitForTimeout(1500); const st=await state(); console.log(name.padEnd(34), JSON.stringify(st.cur), 'items', st.n, check(st)?'PASS':'FAIL'); return st; };
 await run('A cloud has same copy', {layouts:{[D.id]:fl}}, null, s=>s.cur.id===D.id && s.cur.where==='cloud' && !s.cur.dirty && s.n===14);
 await run('B cloud has newer copy', {layouts:{[D.id]:{...fl, items:[...D.items, {...D.items[4], id:99, x:20}], count:15, updatedAt:D.updatedAt+999}}}, null, s=>s.cur.id===D.id && s.n===15);

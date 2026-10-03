@@ -24,7 +24,7 @@ await page.route('https://fonts.googleapis.com/**', r=>r.fulfill({body:'', conte
 await page.route('https://fonts.gstatic.com/**', r=>r.abort());
 // seed old v1 save with a TV pushed behind the alcove wall (reproduces the reported bug)
 await page.goto('file://'+process.cwd()+'/wrapped.html');
-await page.evaluate(()=>{ const its=__t.PRESETS.A.make().map(i=>({...i})); const tv=its.find(i=>i.type==='tv'); tv.z=5.2; tv.x=7.5; tv.diag=115; delete tv.shape; localStorage.setItem('theater113-walkthrough-v1', JSON.stringify({v:1, slot:'A', layouts:{A:its, B:[], C:[]}, fin:{floor:0,wall:1,ceil:0}, light:'bright'})); });
+await page.evaluate(()=>{ localStorage.setItem('tuhaye-focus','theater'); const its=__t.PRESETS.A.make().map(i=>({...i})); const tv=its.find(i=>i.type==='tv'); tv.z=5.2; tv.x=7.5; tv.diag=115; delete tv.shape; localStorage.setItem('theater113-walkthrough-v1', JSON.stringify({v:1, slot:'A', layouts:{A:its, B:[], C:[]}, fin:{floor:0,wall:1,ceil:0}, light:'bright'})); });
 await page.reload(); await page.waitForTimeout(1200);
 const tag=`${scheme}-${vw}`; let n=0;
 const shot=async name=>{ await page.waitForTimeout(450); await page.screenshot({path:`t-${tag}-${String(n++).padStart(2,'0')}-${name}.png`}); };

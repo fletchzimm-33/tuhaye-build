@@ -1,2 +1,4 @@
 node_modules/
 tests/out/
+data/house.json
+__pycache__/

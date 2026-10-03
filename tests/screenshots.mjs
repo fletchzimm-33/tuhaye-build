@@ -20,7 +20,7 @@ const page = await (await browser.newContext({ viewport:{width:VW,height:VH}, de
 const errs=[]; page.on('pageerror', e=>errs.push('PAGEERR '+e.message)); page.on('console', m=>{ if(m.type()==='error'||m.type()==='warning') errs.push(m.text()); });
 await page.route('**/three.min.js', r=>r.fulfill({body:three, contentType:'application/javascript'}));
 await page.route('https://fonts.googleapis.com/**', r=>r.fulfill({body:'', contentType:'text/css'}));
-await page.goto('file://'+process.cwd()+'/wrapped_look2.html'); await page.evaluate(f=>{ localStorage.clear(); if(f) localStorage.setItem('theater113-quality','fast'); }, fast); await page.reload(); await page.waitForTimeout(1200);
+await page.goto('file://'+process.cwd()+'/wrapped_look2.html'); await page.evaluate(f=>{ localStorage.clear(); localStorage.setItem('tuhaye-focus','theater'); if(f) localStorage.setItem('theater113-quality','fast'); }, fast); await page.reload(); await page.waitForTimeout(1200);
 console.log(JSON.stringify(await page.evaluate(()=>__t.info())));
 const tag2=tag+(fast?'-fast':''); let n=0;
 const settle=async()=>{ await page.waitForTimeout(250); const t0=Date.now(); while(Date.now()-t0<60000){ if(await page.evaluate(()=>__t.idle())) break; await page.waitForTimeout(200); } };

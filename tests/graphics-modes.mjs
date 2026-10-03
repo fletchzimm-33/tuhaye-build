@@ -20,7 +20,7 @@ const page = await (await browser.newContext({ viewport:{width:393,height:852}, 
 const errs=[]; page.on('pageerror', e=>errs.push('pageerror '+e.message)); page.on('console', m=>{ if(m.type()==='error'||m.type()==='warning') errs.push(m.text()); });
 await page.route('**/three.min.js', r=>r.fulfill({body:three, contentType:'application/javascript'}));
 await page.route('https://fonts.googleapis.com/**', r=>r.fulfill({body:'', contentType:'text/css'}));
-await page.goto('file://'+process.cwd()+'/wrapped10.html'); await page.evaluate(()=>{ localStorage.clear(); localStorage.setItem('theater113-help-seen','1'); }); await page.reload(); await page.waitForTimeout(1500);
+await page.goto('file://'+process.cwd()+'/wrapped10.html'); await page.evaluate(()=>{ localStorage.clear(); localStorage.setItem('theater113-help-seen','1'); localStorage.setItem('tuhaye-focus','theater'); }); await page.reload(); await page.waitForTimeout(1500);
 const settle=async()=>{ const t0=Date.now(); while(Date.now()-t0<60000){ if(await page.evaluate(()=>__t.idle())) break; await page.waitForTimeout(200); } };
 await settle(); console.log(scheme, 'boot: photo', await page.evaluate(()=>__t.Q.photo), 'toneMapping', await page.evaluate(()=>__t.tm()), 'env', await page.evaluate(()=>__t.env()), 'samples', await page.evaluate(()=>__t.n()));
 await page.screenshot({path:`q-${scheme}-0-boot.png`});

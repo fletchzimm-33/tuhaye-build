@@ -12,6 +12,7 @@ node touch.mjs light 393 852 quick
 node saved-layouts.mjs local    # and: cloud
 node default-layout.mjs
 node graphics-modes.mjs light   # and: dark
+node house.mjs                  # the whole house: stairs, walls, doorways, furniture on both levels
 node screenshots.mjs look       # renders views to out/
 ```
 
