@@ -174,7 +174,7 @@ function prism(B,L,x0,z0,x1,z1,y0,topF,ext,opt={}){
     if(opt.cap!==null) quadF(B,opt.cap||HM.cap,V(a,ta,b0),V(b,tb,b0),V(b,tb,b1),V(a,ta,b1),[0,1,0]);
     if(opt.bot) quadF(B,opt.bot,V(a,y0,b0),V(b,y0,b0),V(b,y0,b1),V(a,y0,b1),[0,-1,0]); }
   for(const [ae,te,sg] of [[a0,T[0],-1],[a1,T[n],1]]){ if(opt.noEnds) break; const p=ax?[ae+sg*.2,bm]:[bm,ae+sg*.2], m=opt.face?opt.face(0,p):sideMat(L,p[0],p[1],ext), dir=ax?[sg,0,0]:[0,0,sg];
-    const k=Math.min(.004,(b1-b0)/4), R=opt.ends?opt.ends(p):null; // a hair inside the faces; beside an opening only the jamb is drawn (the rest would flicker through the wall face as a dashed line)
+    const R=opt.ends?opt.ends(p):null, k=!R&&wallAt(L,p[0],p[1])?Math.min(.004,(b1-b0)/4):-.004; // tucked a hair inside the faces where another wall continues it (else it flickers through as a dashed line); a hair proud at a jamb or a free end, so no slit opens at the corner
     const c=m===HM.paint&&L.key==='M'&&!opt.face&&roomAt(L,p[0],p[1])?ceilMain(p[0],p[1]):null; // painted only up to that room's ceiling
     const q=(lo,hi,mm)=>{ if(hi>lo+.01) quadF(B,mm,V(ae,lo,b0+k),V(ae,lo,b1-k),V(ae,hi,b1-k),V(ae,hi,b0+k),dir); };
     (R||[[y0,te]]).forEach(([lo,hi])=>{ lo=Math.max(lo,y0); hi=Math.min(hi,te); if(c!=null&&hi>c+.03){ q(lo,Math.min(hi,c),m); q(Math.max(lo,c),hi,ext); } else q(lo,hi,m); }); } }
@@ -206,15 +206,15 @@ function fireplace(B,L,w){ const cx=(w.x0+w.x1)/2, cz=(w.z0+w.z1)/2, top=CUTM!=n
   const fy=y0+1.5, fh=1.4;
   if(w.o.three){ const x0=w.x1-4.2, x1=w.x1-.4; firebox(B,{ax:'x',x0,x1,z:w.z0,dir:-1,y:fy,h:fh}); firebox(B,{ax:'x',x0,x1,z:w.z1,dir:1,y:fy,h:fh}); firebox(B,{ax:'z',z0:w.z0+.4,z1:w.z1-.4,x:w.x1,dir:1,y:fy,h:fh}); hbox(B,HM.stone,w.x0-.1,y0+1.2,w.z0-.25,w.x1+.25,y0+1.5,w.z1+.25); return; }
   const fw=Math.min(4.2,(face==='N'||face==='S'?w.x1-w.x0:w.z1-w.z0)-1.2);
-  if(face==='N'||face==='S'){ const x0=cx-fw/2, x1=cx+fw/2, z=face==='N'?w.z0:w.z1, dir=face==='N'?-1:1; firebox(B,{ax:'x',x0,x1,z,dir,y:fy,h:fh}); hbox(B,HM.stone,x0-1,y0,Math.min(z,z+dir*1.2),x1+1,y0+1.25,Math.max(z,z+dir*1.2)); }
+  if(face==='N'||face==='S'){ const x0=cx-fw/2, x1=cx+fw/2, z=face==='N'?w.z0:w.z1, dir=face==='N'?-1:1; firebox(B,{ax:'x',x0,x1,z,dir,y:fy,h:fh}); hbox(B,HM.stone,Math.max(w.x0,x0-1),y0,Math.min(z,z+dir*1.2),Math.min(w.x1,x1+1),y0+1.25,Math.max(z,z+dir*1.2)); }
   else { const z0=cz-fw/2, z1=cz+fw/2, x=face==='W'?w.x0:w.x1, dir=face==='W'?-1:1; firebox(B,{ax:'z',z0,z1,x,dir,y:fy,h:fh}); } }
 
 /* lower walls outside the main level's footprint rise past the lower ceiling to whatever covers them (a deck or a roof), so no gap opens between */
 function lowerUps(B){ const L=HL.L, DK=HOUSE.decks.map(d=>({p:d.poly.map(([X,Z])=>[sX(X),sZ(Z)]),y:d.y})), mainAt=(x,z)=>roomAt(HL.M,x,z)||wallAt(HL.M,x,z)||openAt(HL.M,x,z);
-  const cover=(x,z)=>{ let t=-1e9; for(const d of DK) if(inPoly(x,z,d.p)) t=Math.max(t,d.y-1); const rf=roofAt(x,z); if(rf) t=Math.max(t,rf.t-rf.r.th+.02); return t>-1e8?t:null; };
+  const cover=(x,z)=>{ let t=1e9; for(const d of DK) if(inPoly(x,z,d.p)&&d.y-1>CUT+.05) t=Math.min(t,d.y-1); for(const r of ROOFS) if(inRect(r,x,z)){ const u=r.top(x,z)-r.th+.02; if(u>CUT+.05) t=Math.min(t,u); } return t<1e8?t:null; }; // the nearest cover above
   [...L.walls.filter(w=>w.k==='w'||w.k==='c'),...L.opens].forEach(w=>{ const ax=(w.x1-w.x0)>=(w.z1-w.z0), half=Math.min(w.x1-w.x0,w.z1-w.z0)/2, a0=ax?w.x0:w.z0, a1=ax?w.x1:w.z1, bm=ax?(w.z0+w.z1)/2:(w.x0+w.x1)/2;
     const ext=extMat(L,w.k?w:(wallAt(L,ax?w.x0-.05:bm,ax?bm:w.z0-.05)||wallAt(L,ax?w.x1+.05:bm,ax?bm:w.z1+.05))), n=Math.max(1,Math.ceil(a1-a0)), P=(a,o)=>ax?[a,bm+o]:[bm+o,a];
-    const top=a=>{ const pts=[P(a,0),P(a,-(half+.3)),P(a,half+.3)]; if(pts.some(p=>mainAt(...p))) return null; let t=null; pts.forEach(p=>{ const c=cover(...p); if(c!=null&&(t==null||c>t)) t=c; }); return t!=null&&t>CUT+.05?t:null; };
+    const top=a=>{ const pts=[P(a,0),P(a,-(half+.3)),P(a,half+.3)]; if(pts.some(p=>mainAt(...p))) return null; let t=null; pts.forEach(p=>{ const c=cover(...p); if(c!=null&&(t==null||c<t)) t=c; }); return t!=null&&t>CUT+.05?t:null; };
     let s0=null; for(let i=0;i<=n;i++){ const a=a0+(a1-a0)*Math.min(i+.5,n)/n, on=i<n&&top(a)!=null; if(on&&s0==null) s0=a0+(a1-a0)*i/n; if(!on&&s0!=null){ const s1=a0+(a1-a0)*i/n; prism(B,L,...(ax?[s0,w.z0,s1,w.z1]:[w.x0,s0,w.x1,s1]),CUT,(x,z)=>{ const t=top(ax?x:z); return t==null?CUT:t; },ext,{face:()=>ext}); s0=null; } } }); }
 
 /* ---------- openings: the solid wall above and below each void, then the frame, glass or door that fills it ---------- */
@@ -254,8 +254,10 @@ function fillOpening(B,L,o,v,ax,fl){ const a0=ax?o.x0:o.z0, a1=ax?o.x1:o.z1, b0=
   // swinging doors: shown open, swung into the room that is not a hallway (or the smaller room); a door to the outside is shown shut
   casing(hi); const rooms=sides.filter(x=>x.room); let into=o.o.swing!=null?o.o.swing:1;
   if(rooms.length===1) into=rooms[0].s; else if(rooms.length===2){ const [A,Bb]=rooms, ca=CIRC.test(A.room.n), cb=CIRC.test(Bb.room.n); if(ca!==cb) into=ca?Bb.s:A.s; else into=polyArea(A.room.p)<polyArea(Bb.room.p)?A.s:Bb.s; }
-  const pair=t==='door2'||o.o.pair, leaves=pair?[[a0,1],[a1,-1]]:[[o.o.hinge===1?a1:a0,o.o.hinge===1?-1:1]], lw=(pair?len/2:len)-.04, glassD=!!o.o.glass;
+  const pair=t==='door2'||o.o.pair, lw=(pair?len/2:len)-.04, glassD=!!o.o.glass; let leaves=pair?[[a0,1],[a1,-1]]:[[o.o.hinge===1?a1:a0,o.o.hinge===1?-1:1]];
   const shut=rooms.length<2;
+  if(!shut){ const fits=(inS,lv)=>lv.every(([hp,dA])=>{ const c=Math.cos(1.45), s=Math.sin(1.45), bf=inS<0?b0:b1; for(let k=.3;k<=lw+.01;k+=.3){ const a=hp+dA*k*c, b=bf+inS*k*s, P=ax?[a,b]:[b,a]; if(!roomAt(L,P[0],P[1])||wallAt(L,P[0],P[1])) return false; } return true; });
+    const flip=lv=>lv.map(([hp,dA])=>[hp===a0?a1:a0,-dA]), ok=[[into,leaves],[into,flip(leaves)],[-into,leaves],[-into,flip(leaves)]].find(([i,lv])=>fits(i,lv)); if(ok){ into=ok[0]; leaves=ok[1]; } }
   leaves.forEach(([hp,dirA])=>{ const ang=shut?0:1.45, c=Math.cos(ang), s=Math.sin(ang), bf=shut?bm:into<0?b0:b1, ca=hp+dirA*lw/2*c, cb=bf+into*lw/2*s, g=new THREE.Mesh(boxG(lw,hi-lo-.03,.15), glassD?HM.glass:M.door);
     g.position.set(ax?ca:cb, lo+(hi-lo-.03)/2, ax?cb:ca); g.rotation.y=(ax?0:-Math.PI/2)+(ax?-dirA*into*ang:dirA*into*ang); g.castShadow=!glassD; g.receiveShadow=true; LEAVES.push(g); });
   function leaf(p0,p1,y0,y1,q0,q1,kind){ const g=new THREE.Mesh(boxG(p1-p0,y1-y0,q1-q0), kind==='barn'?mat('wood','#6b4a33'):M.door); g.position.set(ax?(p0+p1)/2:(q0+q1)/2,(y0+y1)/2,ax?(q0+q1)/2:(p0+p1)/2); if(!ax) g.rotation.y=Math.PI/2; g.castShadow=g.receiveShadow=true; LEAVES.push(g); } }
@@ -310,7 +312,9 @@ function buildStairs(pick){ (HOUSE.rails||[]).forEach(([X0,Z0,X1,Z1,y0,y1])=>{ c
     const ax=s.ax==='x', A=v=>ax?sX(v):sZ(v), Bv=v=>ax?sZ(v):sX(v), a0=A(s.a0), a1=A(s.a1), b0=Bv(s.b[0]), b1=Bv(s.b[1]), n=s.nr, d=(a1-a0)/(n-1), rise=(s.y1-s.y0)/n, open=s.n.startsWith('main');
     const box=(p0,p1,y0,y1,m)=>{ const lo=Math.min(p0,p1), hi=Math.max(p0,p1); ax?hbox(B,m,lo,y0,b0,hi,y1,b1):hbox(B,m,b0,y0,lo,b1,y1,hi); };
     for(let i=0;i<n-1;i++){ const p0=a0+i*d, p1=p0+d, y=s.y0+(i+1)*rise; if(open) box(p0,p1+Math.sign(d)*.08,y-.15,y,{px:HM.wood,nx:HM.wood,pz:HM.wood,nz:HM.wood,py:HM.wood,ny:HM.wood});
-      else box(p0,p1,Math.min(s.y0,s.y1)-(s.ext?.5:0),y,s.ext?(s.n==='spa'?HM.pavers:HM.stone):{px:HM.paint,nx:HM.paint,pz:HM.paint,nz:HM.paint,py:HM.wood,ny:null}); }
+      else box(p0,p1,Math.min(s.y0,s.y1)-(s.ext?.5:0),y,s.ext?(s.n==='spa'?HM.pavers:{px:HM.stone,nx:HM.stone,pz:HM.stone,nz:HM.stone,py:HM.pavers,ny:null}):{px:HM.paint,nx:HM.paint,pz:HM.paint,nz:HM.paint,py:HM.wood,ny:null}); }
+    if(!open&&s.y1>s.y0){ const yT=s.y0+(n-1)*rise; if(s.y1-yT>.01){ const sg=Math.sign(d), m=s.ext?(s.n==='spa'?HM.pavers:HM.stone):HM.paint, P=(a,y,b)=>ax?[a,y,b]:[b,y,a]; // the riser up to the floor at the top
+        quadF(B,m,P(a1,yT,b0),P(a1,yT,b1),P(a1,s.y1,b1),P(a1,s.y1,b0),ax?[-sg,0,0]:[0,0,-sg]); } }
     if(open){ const lo=Math.min(s.y0,s.y1); [b0+.02,b1-.12].forEach(bb=>{ const yA=s.y0-.9, yB=s.y1-.9; const P=(a,y,b)=>ax?[a,y,b]:[b,y,a];
         quadF(B,HM.steel,P(a0,s.y0,bb),P(a1,s.y1,bb),P(a1,yB,bb),P(a0,yA,bb),ax?[0,0,-1]:[-1,0,0]); quadF(B,HM.steel,P(a0,s.y0,bb+.1),P(a1,s.y1,bb+.1),P(a1,yB,bb+.1),P(a0,yA,bb+.1),ax?[0,0,1]:[1,0,0]);
         quadF(B,HM.steel,P(a0,s.y0,bb),P(a1,s.y1,bb),P(a1,s.y1,bb+.1),P(a0,s.y0,bb+.1),[0,1,0]); quadF(B,HM.steel,P(a0,yA,bb),P(a1,yB,bb),P(a1,yB,bb+.1),P(a0,yA,bb+.1),[0,-1,0]); });
@@ -346,18 +350,19 @@ function buildSite(Bl,Bm){ const P=a=>a.map(([X,Z])=>[sX(X),sZ(Z)]), R=r=>({x0:s
   { const f=HOUSE.fire, r=R(f.r); hbox(Bm,HM.stone,r.x0,f.y,r.z0,r.x1,f.y+f.h,r.z1); hbox(Bm,HM.ballast,r.x0+.6,f.y+f.h,r.z0+.6,r.x1-.6,f.y+f.h+.05,r.z1-.6); hbox(Bm,HM.fire,(r.x0+r.x1)/2-.06,f.y+f.h+.05,r.z0+1.2,(r.x0+r.x1)/2+.06,f.y+f.h+.3,r.z1-1.2); }
   { const b=HOUSE.bbq, r=R(b.r); hbox(Bm,HM.stone,r.x0,b.y,r.z0,r.x1,b.y+b.h,r.z1); hbox(Bm,HM.fascia,r.x0-.1,b.y+b.h,r.z0-.1,r.x1+.1,b.y+b.h+.12,r.z1+.1); hbox(Bm,HM.steel,r.x0+.1,b.y+b.h+.12,r.z0+1.4,r.x1-.1,b.y+b.h+.75,r.z1-1.4); } }
 let LAWN=null; // the grass is walkable wherever the house, terraces and walls are not
-function onLawn(x,z){ const L=LAWN; if(!L||x<L.X0||z<L.Z0||x>L.X1||z>L.Z1) return false; const u=Math.floor((x-L.X0)*L.PX), v=Math.floor((z-L.Z0)*L.PX); if(u<0||v<0||u>=L.W||v>=L.H) return false; return L.img[(v*L.W+u)*4]<128; }
+function onLawn(x,z){ const L=LAWN; if(!L||x<L.X0||z<L.Z0||x>L.X1||z>L.Z1) return false; const u=Math.floor((x-L.X0)*L.PX), v=Math.floor((z-L.Z0)*L.PX); if(u<0||v<0||u>=L.W||v>=L.H) return false; const i=(v*L.W+u)*4; return L.img[i]<128&&!(L.img[i+2]>128&&grade(x,z)>YM-3); }
 /* terrain: grade sampled from the elevation sheets, smoothed between points, cut away wherever the house, terraces or driveway sit */
 const TPTS=HOUSE.terrain.map(([X,Z,y])=>[sX(X),sZ(Z),y]);
 function grade(x,z){ let s=0, w=0; for(const [px,pz,py] of TPTS){ const d2=(x-px)*(x-px)+(z-pz)*(z-pz)+1; const k=1/(d2*d2); s+=py*k; w+=k; } return s/w; }
 function buildTerrain(group){ const X0=sX(-60), X1=sX(175), Z0=sZ(-60), Z1=sZ(185), C=1.25, nx=Math.ceil((X1-X0)/C), nz=Math.ceil((Z1-Z0)/C), PX=2, W=Math.ceil((X1-X0)*PX), H=Math.ceil((Z1-Z0)*PX);
   const [cv,g]=cnv(W,H), path=(pts)=>{ g.beginPath(); pts.forEach(([x,z],i)=>{ const u=(x-X0)*PX, v=(z-Z0)*PX; i?g.lineTo(u,v):g.moveTo(u,v); }); g.closePath(); g.fill(); }, rect=r=>path([[r.x0,r.z0],[r.x1,r.z0],[r.x1,r.z1],[r.x0,r.z1]]);
   g.fillStyle='#000'; g.fillRect(0,0,W,H); g.fillStyle='#0f0'; path(HOUSE.drive.map(([X,Z])=>[sX(X),sZ(Z)]));
-  g.fillStyle='#f00'; ['L','M'].forEach(k=>{ HL[k].rooms.forEach(r=>path(r.p)); HL[k].walls.forEach(rect); HL[k].opens.forEach(rect); }); if(POLY.length) path(POLY); SHELL.forEach(rect);
+  g.fillStyle='#00f'; HL.M.rooms.forEach(r=>path(r.p)); HL.M.walls.forEach(rect); HL.M.opens.forEach(rect); // the main level: cuts the ground only where the ground comes up near its floor
+  g.fillStyle='#f00'; HL.L.rooms.forEach(r=>path(r.p)); HL.L.walls.forEach(rect); HL.L.opens.forEach(rect); if(POLY.length) path(POLY); SHELL.forEach(rect);
   HOUSE.ter.forEach(t=>path(t.poly.map(([X,Z])=>[sX(X),sZ(Z)]))); HOUSE.swall.forEach(w=>rect({x0:sX(w.r[0]),x1:sX(w.r[1]),z0:sZ(w.r[2]),z1:sZ(w.r[3])})); HOUSE.plant.forEach(w=>rect({x0:sX(w.r[0]),x1:sX(w.r[1]),z0:sZ(w.r[2]),z1:sZ(w.r[3])}));
-  HOUSE.stairs.filter(s=>s.ext).forEach(s=>{ const ax=s.ax==='x'; rect(ax?{x0:sX(Math.min(s.a0,s.a1))-1,x1:sX(Math.max(s.a0,s.a1))+1,z0:sZ(s.b[0]),z1:sZ(s.b[1])}:{x0:sX(s.b[0]),x1:sX(s.b[1]),z0:sZ(Math.min(s.a0,s.a1)),z1:sZ(Math.max(s.a0,s.a1))}); });
+  HOUSE.stairs.filter(s=>s.ext).forEach(s=>{ const ax=s.ax==='x'; rect(ax?{x0:sX(Math.min(s.a0,s.a1)),x1:sX(Math.max(s.a0,s.a1)),z0:sZ(s.b[0]),z1:sZ(s.b[1])}:{x0:sX(s.b[0]),x1:sX(s.b[1]),z0:sZ(Math.min(s.a0,s.a1)),z1:sZ(Math.max(s.a0,s.a1))}); });
   HOUSE.decks.filter(d=>/Covered Entry|Dog Run|Sitting/.test(d.n)).forEach(d=>path(d.poly.map(([X,Z])=>[sX(X),sZ(Z)])));
-  const img=g.getImageData(0,0,W,H).data; LAWN={X0,Z0,X1,Z1,PX,W,H,img}; const cls0=(x,z)=>{ const u=Math.floor((x-X0)*PX), v=Math.floor((z-Z0)*PX); if(u<0||v<0||u>=W||v>=H) return 0; const i=(v*W+u)*4; return img[i]>128?2:img[i+1]>128?1:0; };
+  const img=g.getImageData(0,0,W,H).data; LAWN={X0,Z0,X1,Z1,PX,W,H,img}; const cls0=(x,z)=>{ const u=Math.floor((x-X0)*PX), v=Math.floor((z-Z0)*PX); if(u<0||v<0||u>=W||v>=H) return 0; const i=(v*W+u)*4; return img[i]>128||(img[i+2]>128&&grade(x,z)>YM-3)?2:img[i+1]>128?1:0; };
   const hgt=new Float32Array((nx+1)*(nz+1)); for(let j=0;j<=nz;j++) for(let i=0;i<=nx;i++) hgt[j*(nx+1)+i]=grade(X0+i*C,Z0+j*C);
   /* grass under the drive stays (the drive sits just above it). A cell that straddles the house edge is drawn in sixteenths, leaving out the
      pieces over the house, so the slope never pokes through a wall into a room where the ground outside is higher than the floor inside */
@@ -400,7 +405,7 @@ function buildHouse(){ Object.values(HG).forEach(g=>{ if(g===HG.shell||g===HG.sh
 /* the theater's own outside walls, rebuilt with the room so they follow its dimensions; the theater draws the inside faces */
 function buildShell(){ [HG.shell,HG.shellUp].forEach(g=>{ g.traverse(o=>{ if(o.geometry) o.geometry.dispose(); }); g.clear(); }); SHELL=[]; if(!POLY.length) return;
   const B=Bk(), Bu=Bk(), top=P.ceil, west=EDGES.find(e=>Math.abs(e.a[0])<1e-6&&Math.abs(e.b[0])<1e-6), gaps=west?doorsOf(P).map(d=>[d.z0,d.z0+DOOR_W]).sort((a,b)=>a[0]-b[0]):[];
-  const face=(sg,p)=>{ if(sg===0) return roomAt(HL.L,p[0],p[1])||(west&&Math.abs(p[0]-west.a[0])<1.5&&gaps.some(([g0,g1])=>p[1]>g0-.5&&p[1]<g1+.5))?HM.paint:HM.stone; /* ends: painted only at a doorway or inside a room */
+  const face=(sg,p)=>{ if(sg===0) return inPoly(p[0],p[1],POLY)?null:roomAt(HL.L,p[0],p[1])||(west&&Math.abs(p[0]-west.a[0])<1.5&&gaps.some(([g0,g1])=>p[1]>g0-.5&&p[1]<g1+.5))?HM.paint:HM.stone; /* ends: painted only at a doorway or inside a room */
     if(inPoly(p[0],p[1],POLY)) return null; return roomAt(HL.L,p[0],p[1])?HM.paint:HM.stone; };
   const thick=e=>{ if(e===west) return .43; const mx=(e.a[0]+e.b[0])/2-e.n[0]*.8, mz=(e.a[1]+e.b[1])/2-e.n[1]*.8; return roomAt(HL.L,mx,mz)?.5:1.0; };
   const piece=(x0,z0,x1,z1,y0,y1,opt)=>{ prism(B,HL.L,x0,z0,x1,z1,y0,y1,HM.stone,Object.assign({face},opt||{})); };
@@ -565,8 +570,9 @@ function bSteps(it){ const g=new THREE.Group(), {w,d,h}=it, wood=mat('wood',it.c
 function bBed(it){ const g=new THREE.Group(), {w,d,h}=it, fab=mat(kindOf(it),it.color), white=mat('fabric','#ecebe6'), duv=mat('fabric',it.duvet||'#d8d2c6'), pil=mat('fabric','#efece4'), leg=mat('wood','#2a1d14');
   [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>add(g, boxG(.15,.35,.15), leg, a*(w/2-.15),.175,b*(d/2-.15)));
   add(g, rboxG(w,.6,d,.08,.02), fab, 0,.65,0); add(g, rboxG(w+.15,h-.35,.38,.12,.03), fab, 0,.35+(h-.35)/2,-d/2+.19);
-  add(g, rboxG(w-.2,.8,d-.55,.14,.04), white, 0,1.35,.12); add(g, rboxG(w-.05,.22,d*.62,.1,.05), duv, 0,1.82,d*.17);
-  add(g, rboxG(w-.02,.07,d*.62,.03,.0), duv, 0,1.0,d*.17+.01); const np=w>4?2:1; for(let i=0;i<np;i++){ const x=np===1?0:(i?.9:-.9)*w/4; add(g, rboxG(Math.min(2.5,w/np-.3),.5,1.1,.22,.1), pil, x,2.0,-d/2+.95); } return g; }
+  add(g, rboxG(w-.2,.8,d-.55,.14,.04), white, 0,1.35,.12);
+  { const fz=.12+(d-.55)/2+.05, dd=d*.64, dw=w-.1, cz=fz-dd/2; add(g, rboxG(dw,.12,dd,.05,.03), duv, 0,1.81,cz); // duvet over the top, falling over the sides and foot
+    [-1,1].forEach(sg=>add(g, rboxG(.06,.62,dd,.03,0), duv, sg*(dw/2-.03),1.56,cz)); add(g, rboxG(dw,.62,.06,.03,0), duv, 0,1.56,fz-.03); } const np=w>4?2:1; for(let i=0;i<np;i++){ const x=np===1?0:(i?.9:-.9)*w/4; add(g, rboxG(Math.min(2.5,w/np-.3),.5,1.1,.22,.1), pil, x,2.0,-d/2+.95); } return g; }
 /* the fixtures are part of the house, not the layout: built once into each level's group */
 function buildFixtures(){ const tmp={FM:new THREE.Group(), FL:new THREE.Group()};
   (HOUSE.fix||[]).forEach(([type,X,Z,rot,fy,o])=>{ if(!TYPES[type]) return; const it=mk(type,sX(X),sZ(Z),rot,o||{}); it.fy=fy; if(type==='range') it.hoodTop=ceilFor(it.x,it.z,fy)-.02;
@@ -588,7 +594,7 @@ const HOUSE_FURN=[
  ['lounge',13.6,14.6,45,FM,{color:'#c8bda9',uph:'fabric'}], ['lounge',13.6,24.2,135,FM,{color:'#c8bda9',uph:'fabric'}], ['side',13.3,19.4,0,FM,{}],
  ['console',19.6,26.7,180,FM,{w:34,d:20,h:20}], ['console',29.15,26.7,180,FM,{w:34,d:20,h:20}],
  // bedroom #2
- ['bed',21.5,113.5,180,FM,{w:80,d:84,color:'#8a8478'}], ['nightstand',17.0,116.2,180,FM,{}], ['nightstand',25.9,116.2,180,FM,{}], ['dresser',13.9,101.9,0,FM,{w:56}], ['lounge',11.4,115.2,90,FM,{color:'#c8bda9',uph:'fabric'}],
+ ['bed',21.5,113.5,180,FM,{w:80,d:84,color:'#8a8478'}], ['nightstand',17.0,116.2,180,FM,{}], ['nightstand',25.9,116.2,180,FM,{}], ['dresser',13.9,101.9,0,FM,{w:56}], ['lounge',11.3,111.2,90,FM,{color:'#c8bda9',uph:'fabric'}],
  // covered dining (deck)
  ['dining',17.9,94.0,0,FD,{w:96,d:40,color:'#7a5a3e'}], ...[15.6,17.9,20.2].flatMap(x=>[['chair',x,92.4,0,FD,{color:'#3e4045'}],['chair',x,95.6,180,FD,{color:'#3e4045'}]]),
  // lower level: bedroom #3, bedroom #4, office

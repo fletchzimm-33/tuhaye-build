@@ -10,6 +10,7 @@ FLOOR=6766.5
 CEIL=10.0
 THEATER=dict(x=39.0, z=116.58)
 W=[
+ (24.92,0.84,25.17,1.67,'w'),          # mech #1 corner
  # ---------- north: mech terrace / Mech #1
  (16.95,-0.05,24.92,1.67,'w',dict(ext='stone')),          # solid block under the primary bath north wall (two walls + hatched void)
  (24.92,0.0,35.51,0.84,'c'),            # Mech #1 north foundation wall (retains grade)
