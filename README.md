@@ -12,7 +12,7 @@ It is built from:
 Walk through any room, go up and down the stairs, step out onto the decks, move and add furniture on either level, try TV sizes,
 floors, wall colors and lighting, and save layouts.
 
-**Live site:** https://tuhaye-build.vercel.app/ (if the address ever changes, update `SITE_URL` in `src/app.html` and `SITE` in `scripts/build-site.py`, then rebuild)
+**Live site:** https://ridgeline-residence-3d-walkthrough.vercel.app/ (if the address ever changes, update `SITE_URL` in `src/app.html` and `SITE` in `scripts/build-site.py`, then rebuild)
 
 ## Using it
 
