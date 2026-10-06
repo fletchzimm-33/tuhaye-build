@@ -35,17 +35,20 @@ W=[
  # ---------- stair hall (concrete north + east)
  (34.38,23.02,41.01,23.86,'c'),
  (35.51,23.86,39.93,24.14,'w'),         # furring
- (35.08,23.86,35.5,24.5,'w'),           # door 103 jamb
+ (35.08,23.86,35.5,24.5,'w'),           # door 103 jambs
+ (35.08,27.33,35.5,27.53,'w'),
  (39.93,23.86,41.01,46.5,'c'),
  # ---------- office
  (24.0,28.0,24.43,30.5,'w',dict(ext='vsiding')),            # west (windows 36a/36b)
+ (24.0,33.45,24.43,33.55,'w',dict(ext='vsiding')),          # mullion between 36a and 36b
  (24.0,36.5,24.43,37.51,'w',dict(ext='vsiding')),
  (35.08,28.0,35.5,31.17,'w'),           # east (barn doors 104, closet 119)
  (35.08,35.92,35.5,38.67,'w'),
  (35.08,41.42,35.5,42.05,'w'),
  (22.01,37.51,35.5,37.95,'w'),          # office south
  # ---------- stair / closet under upper run
- (22.01,37.95,22.48,46.51,'w'),         # exterior wall west of the landing
+ (22.01,37.95,22.48,38.75,'w'),         # exterior wall west of the landing (stair window 19a between)
+ (22.01,45.6,22.48,46.51,'w'),
  (26.4,42.05,35.5,42.49,'w'),           # closet south = lower-run north wall
  # ---------- rec room
  (14.04,46.51,15.5,47.17,'w'),          # north wall west of stair (window 37b)

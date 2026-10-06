@@ -91,7 +91,7 @@ const HM=(()=>{ const std=(o,t,env,p)=>{ const m=(p&&p.cc)?new THREE.MeshPhysica
     mesh:  new THREE.MeshStandardMaterial({color:col('#2a2a2a'), map:TX.net, roughness:.6, metalness:.5, transparent:true, opacity:.9, side:THREE.DoubleSide, depthWrite:false}),
     cap:   M.cap,
   };
-  o.glass.userData.env=1.6; o.glass.userData.noShadow=true; o.mesh.userData.env=.5; o.mesh.userData.noShadow=true; unify(o.glass); unify(o.mesh);
+  o.glass.userData.env=1.6; o.glass.userData.noShadow=true; o.mesh.userData.env=.5; o.mesh.userData.noShadow=true; o.cable.userData.noShadow=true; unify(o.glass); unify(o.mesh); // quarter-inch cables cast no useful shadow, only aliased lines
   return o; })();
 function WHITE_T(){ return whiteFor(TXN.paint.repeat); }
 const HMAT_LIST=Object.values(HM).filter(m=>m&&m.isMaterial&&m!==M.trim&&m!==M.door&&m!==M.cap);
@@ -128,7 +128,7 @@ const HL={ L:{ y:0, key:'L' }, M:{ y:YM, key:'M' } };
 HL.M.rooms.push({n:'Stairwell',u:'',f:null,dy:0,nf:true,p:[[sX(22.48),sZ(37.96)],[sX(35.53),sZ(37.96)],[sX(35.53),sZ(46.51)],[sX(22.48),sZ(46.51)]]}); HL.M.rooms[HL.M.rooms.length-1].bb=bboxOf(HL.M.rooms[HL.M.rooms.length-1].p);
 HL.L.rooms.forEach(r=>{ if(r.n==='Stair'||(r.n==='Closet'&&r.u==='119')) r.nc=true; });
 const CEILZ=HOUSE.M.ceil.map(z=>({x0:sX(z.r[0]),x1:sX(z.r[1]),z0:sZ(z.r[2]),z1:sZ(z.r[3]),n:z.n, f:(x,z2)=>YM+z.c+(z.gx||0)*(x+HO[0])+(z.gz||0)*(z2+HO[1])}));
-{ const mud=CEILZ.find(z=>z.n==='mud'); const flat=CEILZ.findIndex(z=>z.n==='flat'); if(mud){ CEILZ.splice(CEILZ.indexOf(mud),1); const lau=Object.assign({},mud,{x0:sX(38.99),z0:sZ(100.53)}); mud.x0=sX(43.57); CEILZ.splice(flat,0,mud,lau); } }
+{ const mud=CEILZ.find(z=>z.n==='mud'); if(mud&&CEILZ.some(z=>z.n==='flat')){ CEILZ.splice(CEILZ.indexOf(mud),1); CEILZ.splice(CEILZ.findIndex(z=>z.n==='flat'),0,mud); } } // the mudroom, laundry and the stair up to them share the sloped ceiling under the garage roof
 function inRect(r,x,z,e=0){ return x>=r.x0-e&&x<=r.x1+e&&z>=r.z0-e&&z<=r.z1+e; }
 function roomAt(L,x,z){ for(const r of L.rooms){ if(x<r.bb.x0||x>r.bb.x1||z<r.bb.z0||z>r.bb.z1) continue; if(inPoly(x,z,r.p)) return r; } return null; }
 function ceilMain(x,z){ for(const c of CEILZ) if(inRect(c,x,z)) return c.f(x,z); return YM+9; }
@@ -181,7 +181,7 @@ function buildWalls(L,B){ const main=L.key==='M';
     prism(B,L,w.x0,w.z0,w.x1,w.z1,y0,topF,ext,{band, base:true, bot:main?HM.soffit:null}); });
   L.walls.forEach(w=>{ const yb=main?(YM+(roomAt(L,(w.x0+w.x1)/2,(w.z0+w.z1)/2+2)||{dy:0}).dy):L.y;
     if(w.k==='g') glassWall(B,w,yb+.0,yb+(w.o.h||7.5));
-    if(w.k==='p'){ let top=w.o.top!=null?w.o.top-6766.5:yb+9; if(CUTM!=null) top=Math.min(top,CUTM); hbox(B,extMat(L,w),w.x0,main?CUT:L.y,w.z0,w.x1,top,w.z1); hbox(B,HM.fascia,w.x0-.15,top,w.z0-.15,w.x1+.15,top+.25,w.z1+.15); }
+    if(w.k==='p'){ let top=w.o.top!=null?w.o.top-6766.5:yb+9; if(CUTM!=null) top=Math.min(top,CUTM); const em=extMat(L,w); prism(B,L,w.x0,w.z0,w.x1,w.z1,main?CUT:L.y,top,em,{face:(sg,p)=>roomAt(L,p[0],p[1])?HM.paint:em, cap:null}); /* painted where it faces into a room */ hbox(B,HM.fascia,w.x0-.15,top,w.z0-.15,w.x1+.15,top+.25,w.z1+.15); }
     if(w.k==='v'){ hbox(B,{px:HM.stone,nx:HM.stone,pz:HM.stone,nz:HM.stone,py:HM.cap,ny:null},w.x0,L.y,w.z0,w.x1,L.y+9,w.z1); firebox(B,{x0:sX(22.8),x1:sX(27.7),z:w.z0,dir:-1,ax:'x',y:L.y+1.6,h:1.1}); } // the linear fireplace, TV above
     if(w.k==='fp') fireplace(B,L,w); }); }
 function glassWall(B,w,y0,y1){ const ax=(w.x1-w.x0)>=(w.z1-w.z0), m=(w.x0+w.x1)/2, n=(w.z0+w.z1)/2;
@@ -258,8 +258,12 @@ function mainCeilings(B){ const ZX=[], ZZ=[]; CEILZ.forEach(c=>{ ZX.push(c.x0,c.
 function buildRoofs(B){ ROOFS.forEach(r=>{ const c=[[r.x0,r.z0],[r.x1,r.z0],[r.x1,r.z1],[r.x0,r.z1]], T=c.map(([x,z])=>r.top(x,z)), Bo=T.map(t=>t-r.th+.02), V=(i,y)=>[c[i][0],y,c[i][1]];
     const top=r.k==='flat'?HM.ballast:(r.fall==='E'||r.fall==='W')?HM.roofX:HM.roofZ;
     quadF(B,top,V(0,T[0]),V(1,T[1]),V(2,T[2]),V(3,T[3]),[0,1,0]); quadF(B,HM.soffit,V(0,Bo[0]),V(1,Bo[1]),V(2,Bo[2]),V(3,Bo[3]),[0,-1,0]);
-    [[0,1,0,-1],[1,2,1,0],[2,3,0,1],[3,0,-1,0]].forEach(([i,j,dx,dz])=>quadF(B,HM.fascia,V(i,Bo[i]),V(j,Bo[j]),V(j,T[j]+.05),V(i,T[i]+.05),[dx,0,dz]));
-    if(r.k==='flat') [[0,1,0,-1],[1,2,1,0],[2,3,0,1],[3,0,-1,0]].forEach(([i,j,dx,dz])=>{ const a=c[i], b=c[j], ox=dx*.25, oz=dz*.25; quadF(B,HM.fascia,[a[0]-ox,T[i]+.05,a[1]-oz],[b[0]-ox,T[j]+.05,b[1]-oz],[b[0],T[j]+.05,b[1]],[a[0],T[i]+.05,a[1]],[0,1,0]); });
+    /* edge fascia, a foot at a time, left off wherever the edge tucks under a taller roof or against a taller room (it would only flicker against that wall) */
+    const tucked=(x,z,t)=>ROOFS.some(o=>o!==r&&inRect(o,x,z)&&o.top(x,z)>t-.05)||(!!roomAt(HL.M,x,z)&&ceilMain(x,z)>t-r.th+.05);
+    [[0,1,0,-1],[1,2,1,0],[2,3,0,1],[3,0,-1,0]].forEach(([i,j,dx,dz])=>{ const a=c[i], b=c[j], n=Math.max(1,Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1]))), P=t=>[a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t];
+      for(let k=0;k<n;k++){ const p0=P(k/n), p1=P((k+1)/n), m=P((k+.5)/n); if(tucked(m[0]+dx*.3, m[1]+dz*.3, r.top(m[0],m[1]))) continue;
+        const y0=r.top(p0[0],p0[1]), y1=r.top(p1[0],p1[1]); quadF(B,HM.fascia,[p0[0],y0-r.th+.02,p0[1]],[p1[0],y1-r.th+.02,p1[1]],[p1[0],y1+.05,p1[1]],[p0[0],y0+.05,p0[1]],[dx,0,dz]);
+        if(r.k==='flat'){ const ox=dx*.25, oz=dz*.25; quadF(B,HM.fascia,[p0[0]-ox,y0+.05,p0[1]-oz],[p1[0]-ox,y1+.05,p1[1]-oz],[p1[0],y1+.05,p1[1]],[p0[0],y0+.05,p0[1]],[0,1,0]); } } });
     if(r.n==='great'||r.n==='dining') for(let X=15;X<=46;X+=6){ const x=sX(X); if(x<r.x0+.3||x>r.x1-.3) continue; const y=r.top(x,r.z0)-r.th; hbox(B,HM.beam,x-.22,y-.9,r.z0+.2,x+.22,y+.01,r.z1-.2); }
     if(r.k==='metal'){ const fallX=r.fall==='E'||r.fall==='W'; // timber outlookers under the low eave
       const eave=r.fall==='N'?r.z0:r.fall==='S'?r.z1:r.fall==='E'?r.x1:r.x0; if(fallX) for(let z=r.z0+2;z<r.z1-1;z+=4){ const x=eave, y=r.top(x,z)-r.th; hbox(B,HM.beam,Math.min(x,x+(r.fall==='E'?-3:3)),y-.55,z-.17,Math.max(x,x+(r.fall==='E'?-3:3)),y+.01,z+.17); }
@@ -326,10 +330,15 @@ function buildTerrain(group){ const X0=sX(-60), X1=sX(175), Z0=sZ(-60), Z1=sZ(18
   HOUSE.stairs.filter(s=>s.ext).forEach(s=>{ const ax=s.ax==='x'; rect(ax?{x0:sX(Math.min(s.a0,s.a1))-1,x1:sX(Math.max(s.a0,s.a1))+1,z0:sZ(s.b[0]),z1:sZ(s.b[1])}:{x0:sX(s.b[0]),x1:sX(s.b[1]),z0:sZ(Math.min(s.a0,s.a1)),z1:sZ(Math.max(s.a0,s.a1))}); });
   HOUSE.decks.filter(d=>/Covered Entry|Dog Run|Sitting/.test(d.n)).forEach(d=>path(d.poly.map(([X,Z])=>[sX(X),sZ(Z)])));
   const img=g.getImageData(0,0,W,H).data; LAWN={X0,Z0,X1,Z1,PX,W,H,img}; const cls0=(x,z)=>{ const u=Math.floor((x-X0)*PX), v=Math.floor((z-Z0)*PX); if(u<0||v<0||u>=W||v>=H) return 0; const i=(v*W+u)*4; return img[i]>128?2:img[i+1]>128?1:0; };
-  const cls=(x,z)=>{ const c=cls0(x,z); if(c!==1) return c; return [[-C/2,-C/2],[C/2,-C/2],[C/2,C/2],[-C/2,C/2]].every(([a,b])=>cls0(x+a,z+b)===1)?1:0; };
   const hgt=new Float32Array((nx+1)*(nz+1)); for(let j=0;j<=nz;j++) for(let i=0;i<=nx;i++) hgt[j*(nx+1)+i]=grade(X0+i*C,Z0+j*C);
-  const Bg=Bk(); for(let j=0;j<nz;j++) for(let i=0;i<nx;i++){ const x=X0+i*C, z=Z0+j*C, c=cls(x+C/2,z+C/2); if(c) continue; const h=(a,b)=>hgt[(j+b)*(nx+1)+i+a];
-    quadF(Bg,HM.grass,[x,h(0,1),z+C],[x+C,h(1,1),z+C],[x+C,h(1,0),z],[x,h(0,0),z],[0,1,0]); }
+  /* grass under the drive stays (the drive sits just above it). A cell that straddles the house edge is drawn in sixteenths, leaving out the
+     pieces over the house, so the slope never pokes through a wall into a room where the ground outside is higher than the floor inside */
+  const Bg=Bk(), SUB=4; for(let j=0;j<nz;j++) for(let i=0;i<nx;i++){ const x=X0+i*C, z=Z0+j*C, h=(a,b)=>hgt[(j+b)*(nx+1)+i+a], inHouse=(u,v)=>cls0(x+u*C,z+v*C)===2;
+    const k=[[.5,.5],[0,0],[1,0],[1,1],[0,1]].filter(([u,v])=>inHouse(u,v)).length;
+    if(k===0){ quadF(Bg,HM.grass,[x,h(0,1),z+C],[x+C,h(1,1),z+C],[x+C,h(1,0),z],[x,h(0,0),z],[0,1,0]); continue; } if(k===5) continue;
+    const hb=(u,v)=>h(0,0)*(1-u)*(1-v)+h(1,0)*u*(1-v)+h(0,1)*(1-u)*v+h(1,1)*u*v;
+    for(let a=0;a<SUB;a++) for(let b=0;b<SUB;b++){ const u0=a/SUB, u1=(a+1)/SUB, v0=b/SUB, v1=(b+1)/SUB; if(inHouse((u0+u1)/2,(v0+v1)/2)) continue;
+      quadF(Bg,HM.grass,[x+u0*C,hb(u0,v1),z+v1*C],[x+u1*C,hb(u1,v1),z+v1*C],[x+u1*C,hb(u1,v0),z+v0*C],[x+u0*C,hb(u0,v0),z+v0*C],[0,1,0]); } }
   const dp=HOUSE.drive.map(([X,Z])=>[sX(X),sZ(Z)]), v2=dp.map(([x,z])=>new THREE.Vector2(x,z)); THREE.ShapeUtils.triangulateShape(v2,[]).forEach(([a,b,c])=>{ const sub=(A,Bq,Cq,d)=>{ const l=Math.max(Math.hypot(A[0]-Bq[0],A[1]-Bq[1]),Math.hypot(Bq[0]-Cq[0],Bq[1]-Cq[1]),Math.hypot(Cq[0]-A[0],Cq[1]-A[1]));
       if(l>3&&d<9){ const m=(P,Q)=>[(P[0]+Q[0])/2,(P[1]+Q[1])/2], ab=m(A,Bq), bc=m(Bq,Cq), ca=m(Cq,A); sub(A,ab,ca,d+1); sub(ab,Bq,bc,d+1); sub(ca,bc,Cq,d+1); sub(ab,bc,ca,d+1); return; }
       const Y=p=>[p[0],grade(p[0],p[1])+.08,p[1]]; tri(Bg,HM.drive,Y(A),Y(Bq),Y(Cq),1); }; sub(dp[a],dp[b],dp[c],0); });
@@ -382,7 +391,7 @@ const FOCI=[['house','Outside'],['main','Main'],['lower','Lower'],['theater','Th
 const FOCUS_KEY='tuhaye-focus';
 let FOCUS=(()=>{ try{ const f=localStorage.getItem(FOCUS_KEY); if(FOCI.some(x=>x[0]===f)) return f; }catch(e){} return 'house'; })();
 /* time of day outside the theater: the light button cycles midday, evening and dusk (the theater keeps Bright, Dim and Movie) */
-const DAYS={ bright:{label:'Midday', dir:[.5,.64,.58], sun:'#fff3e0', ph:2.8, fast:1.75, h:[.62,.66], sky:['#3e79c6','#b3cbe0','#a9a493'], hs:'#cfe0f4', hg:'#c4bcae', exp:1.05, env:['#3f74c4','#a9c6e6','#e8eef2','#8d8a7c','#4a4a40'], disc:[.62,.2,18]},
+const DAYS={ bright:{label:'Midday', dir:[.5,.64,.58], sun:'#fff3e0', ph:2.8, fast:1.75, h:[.62,.66], sky:['#3e79c6','#b3cbe0','#a9a493'], hs:'#d9e2ea', hg:'#d6d1c8', exp:1.05, env:['#3f74c4','#a9c6e6','#e8eef2','#8d8a7c','#4a4a40'], disc:[.62,.2,18]},
   dim:{label:'Evening', dir:[.78,.3,.55], sun:'#ffc98f', ph:2.4, fast:1.5, h:[.42,.5], sky:['#4f73b0','#e8c39a','#8f8775'], hs:'#c9cfe0', hg:'#a89a86', exp:1.1, env:['#4a6aa8','#d9b48c','#f0d3ac','#7a6f60','#3d3a33'], disc:[.75,.38,14]},
   movie:{label:'Dusk', dir:[.82,.1,.5], sun:'#ff9a62', ph:1.1, fast:.8, h:[.2,.3], sky:['#1e2c55','#d4876a','#4f4a46'], hs:'#7f8db5', hg:'#5e5650', exp:1.25, env:['#1c2850','#9a6f86','#e59a6d','#4a4440','#24221f'], disc:[.8,.47,9]} };
 const dayOf=()=>DAYS[S.light]||DAYS.bright;
@@ -445,7 +454,7 @@ function updateTitle(){ const t=$('.tag'), sub=$('#sub'), help=t.querySelector('
   else { set('Tuhaye','House'); sub.innerHTML=`Two levels · ${fmt(levelArea('M')+levelArea('L'))} ft² of rooms<span class="wide"> · from sheets A2.1–A4.4</span>`; } }
 function setFocus(f){ if(!FOCI.some(x=>x[0]===f)) return; FOCUS=f; try{ localStorage.setItem(FOCUS_KEY,f); }catch(e){}
   document.querySelectorAll('#floors button').forEach(b=>{ b.classList.toggle('on',b.dataset.f===f); b.setAttribute('aria-selected',b.dataset.f===f); }); updateTitle(); applyFocusVisibility(); syncEnv();
-  inert=null; if(mode==='orbit') fitOrbit(true); else if(mode==='plan'){ fitPlan(); planFitted=FOCUS; } else { startWalk(); wk.started=true; } dirty(true); }
+  inert=null; if(mode==='orbit') fitOrbit(true); else if(mode==='plan'){ fitPlan(); planFitted=FOCUS; } if(mode==='walk'){ startWalk(); wk.started=true; } else wk.started=false; dirty(true); } // Walk after picking a level starts on that level
 
 /* ---------- built-in fixtures (plumbing, kitchen, laundry, built-ins), modelled like the furniture: local space, footprint centred, front faces +z ---------- */
 let MIRROR=null, TUBIN=null;

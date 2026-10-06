@@ -46,7 +46,8 @@ W=[
  (18.83,46.51,22.02,46.96,'w'),
  (14.03,46.96,14.48,50.3,'w'),          # west wall (multi-slide 220 to view deck)
  (14.03,65.5,14.48,66.52,'w'),
- (40.55,46.51,45.99,46.96,'w'),         # games alcove north (window 7)
+ (40.55,46.51,42.0,46.96,'w'),          # games alcove north (window 7 between)
+ (44.0,46.51,45.99,46.96,'w'),
  (45.53,46.96,45.99,48.0,'w',dict(ext='vsiding')),          # games alcove east (windows 6a/6b)
  (45.53,55.33,45.99,58.51,'w',dict(ext='vsiding')),
  (40.55,58.05,45.99,58.51,'w'),         # games alcove south = covered entry north
@@ -70,7 +71,8 @@ W=[
  (18.03,87.03,18.5,87.49,'w'),          # dining south (multi-slide 217 to covered dining)
  (26.92,87.03,27.43,87.49,'w'),
  # ---------- pantry / powder
- (26.99,87.49,27.43,95.51,'w'),         # pantry west (window 24 to covered dining)
+ (26.99,87.49,27.43,89.8,'w'),          # pantry west (window 24 to covered dining between)
+ (26.99,95.3,27.43,95.51,'w'),
  (27.43,89.31,38.99,89.59,'w'),         # pantry north (wine / ice / ovens built-in in front)
  (38.57,87.03,38.99,89.31,'w'),
  (38.57,89.59,38.99,90.0,'w'),          # pantry east (door 216)
@@ -78,7 +80,7 @@ W=[
  (26.99,95.51,38.99,95.97,'w'),         # pantry south / SW hall north (stair to mudroom open on its north side)
  (43.57,87.49,44.03,91.92,'w'),         # powder west (door 215)
  (43.57,94.8,44.03,95.97,'w'),
- (43.57,87.03,46.5,87.49,'w'),          # powder north (kitchen side)
+ (43.57,87.03,46.55,87.49,'w'),         # powder north (kitchen side)
  (49.93,87.03,50.53,88.0,'w'),
  (49.93,90.08,50.53,95.97,'w'),         # powder east
  (43.57,95.51,56.47,95.97,'w'),         # powder south / mudroom north
@@ -92,7 +94,8 @@ W=[
  (26.99,104.67,27.43,105.31,'w'),
  (26.99,110.5,27.25,117.05,'w'),        # bath #2 west
  (33.17,110.51,38.53,110.97,'w'),       # bath #2 north (pocket from closet #2)
- (27.25,110.51,29.6,110.97,'w'),
+ (27.25,110.51,27.55,110.97,'w'),
+ (30.44,110.51,33.17,110.97,'w'),         # pocket for door 213
  (33.17,110.97,33.3,117.05,'g',dict(h=7.5)),   # shower glass
  (38.53,100.53,38.99,117.5,'w'),        # bath #2 / laundry party wall (east)
  (9.03,100.53,10.0,100.97,'w'),         # bedroom #2 north (door 214)
@@ -178,12 +181,12 @@ O=[
  ('door',38.57,90.0,38.99,93.2,dict(tag='216',h=8,swing=1,hinge=1)),
  ('door',43.57,91.92,44.03,94.8,dict(tag='215',h=8,swing=1,hinge=1)),
  ('win',49.93,88.0,50.53,90.08,dict(tag='1',sill=4.0)),
- ('win',46.5,87.03,49.93,87.49,dict(tag='2',sill=4.0)),
+ ('win',47.0,87.03,49.93,87.49,dict(tag='2',sill=4.0)),
  ('door',26.99,96.67,27.25,99.83,dict(tag='210',h=8,swing=1,hinge=0)),
  ('bifold',31.93,100.53,38.53,100.97,dict(tag='209',h=8)),
  ('pocket',31.48,103.0,31.93,108.6,dict(tag='212',h=8)),
  ('door',26.99,101.33,27.43,104.67,dict(tag='211',h=8,swing=-1,hinge=0)),
- ('pocket',29.6,110.51,33.17,110.97,dict(tag='213',h=8)),
+ ('pocket',27.55,110.51,30.44,110.97,dict(tag='213',h=8)),
  ('door',10.0,100.53,13.17,100.97,dict(tag='214',h=8,swing=1,hinge=0)),
  ('win',9.03,101.4,9.49,110.25,dict(tag='25')),
  ('win',9.5,113.05,12.5,113.52,dict(tag='26')),
@@ -195,7 +198,7 @@ O=[
  ('door',49.0,112.08,52.25,112.52,dict(tag='206',h=8,glass=True,swing=-1,hinge=0)),
  ('door',47.2,105.58,47.65,111.83,dict(tag='207',h=8,swing=1,hinge=1,pair=True)),
  ('door',56.01,96.42,56.47,99.58,dict(tag='204',h=8,swing=1,hinge=0)),
- ('bifold',53.5,106.25,56.0,112.0,dict()),
+ ('bifold',53.5,106.25,53.75,112.08,dict(h=8)),     # mudroom closet
  ('garage',59.0,92.08,69.5,92.58,dict(tag='203',h=8.75)),
  ('garage',71.6,90.58,89.6,91.08,dict(tag='202',h=8.75)),
  ('door',91.58,94.08,92.0,97.33,dict(tag='201',h=7,swing=1,hinge=0)),
