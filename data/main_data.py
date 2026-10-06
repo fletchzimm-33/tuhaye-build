@@ -144,6 +144,7 @@ W=[
  (69.0,116.83,77.0,117.5,'w',dict(wain=5.0)),
  (77.0,116.83,92.0,117.5,'w',dict(ext='stone')),
  (92.0,111.9,103.35,112.5,'w',dict(ext='stone')),         # toy storage south (gas meter enclosure outside)
+ (92.0,112.5,92.67,117.5,'w',dict(ext='stone')),          # garage east, south of the toy storage
 ]
 O=[
  ('win',17.83,0.0,20.42,0.45,dict(tag='14')),
