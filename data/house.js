@@ -489,12 +489,13 @@ const WALK_STARTS={ house:{X:68,Z:75,tX:47,tZ:62}, main:{X:38.2,Z:62.3,tX:20,tZ:
 function houseWalkStart(f){ const s=WALK_STARTS[f], x=sX(s.X), z=sZ(s.Z); let feet=f==='house'?grade(x,z)+.06:f==='main'?YM:0; const fl=floorAt(x,z,feet); if(fl!=null) feet=fl; return {x,z,feet,yaw:Math.atan2(-(sX(s.tX)-x),-(sZ(s.tZ)-z))}; }
 /* level picker + title */
 function levelArea(k){ return Math.round(HL[k].rooms.filter(r=>!r.nf&&!/Garage|Refuse/.test(r.n)).reduce((a,r)=>a+polyArea(r.p),0)+(k==='L'&&POLY.length?polyArea(POLY):0)); }
-function updateTitle(){ const t=$('.tag'), sub=$('#sub'), help=t.querySelector('.helpb'), fmt=n=>n.toLocaleString('en-US');
-  const set=(a,b,el)=>{ t.innerHTML=`${a} <b${el?' class="el"':''}>${b}</b>`; t.appendChild(help); };
-  if(FOCUS==='theater'){ set('Theater','113'); sub.innerHTML=`${ftin(P.W)} × ${ftin(P.thD+P.mD)} · ${ftShort(P.ceil)} ceiling<span class="wide"> · ${Math.round(polyArea(POLY))} ft²</span>`; }
-  else if(FOCUS==='main'){ set('Main level','6778′',1); sub.innerHTML=`${fmt(levelArea('M'))} ft² of rooms · vaulted to ${ftShort(15)}<span class="wide"> · plus 3-car garage</span>`; }
-  else if(FOCUS==='lower'){ set('Lower level','6766′',1); sub.innerHTML=`${fmt(levelArea('L'))} ft² of rooms · 9′ ceilings<span class="wide"> · theater ${ftShort(P.ceil)}</span>`; }
-  else { set('Tuhaye','House'); sub.innerHTML=`Two levels · ${fmt(levelArea('M')+levelArea('L'))} ft² of rooms<span class="wide"> · from sheets A2.1–A4.4</span>`; } }
+const PROJECT='Ridgeline Residence';
+function updateTitle(){ const sub=$('#sub'), fmt=n=>n.toLocaleString('en-US'), aM=levelArea('M'), aL=levelArea('L'), aT=Math.round(polyArea(POLY));
+  if(FOCUS==='theater') sub.innerHTML=`Theater · ${ftin(P.W)} × ${ftin(P.thD+P.mD)}<span class="wide"> · ${ftShort(P.ceil)} ceiling, golf bay and wet bar</span>`;
+  else if(FOCUS==='main') sub.innerHTML=`Main level · ${fmt(aM)} ft²<span class="wide"> · ceilings vaulted to ${ftShort(15)}, 3-car garage</span>`;
+  else if(FOCUS==='lower') sub.innerHTML=`Lower level · ${fmt(aL)} ft²<span class="wide"> · 9′ ceilings, theater, guest rooms</span>`;
+  else sub.innerHTML=`${fmt(aM+aL)} ft² · two levels<span class="wide"> · drawn to scale from the architectural plans</span>`;
+  const fa={house:`${fmt(aM+aL)} ft²`, main:`${fmt(aM)} ft²`, lower:`${fmt(aL)} ft²`, theater:`${fmt(aT)} ft²`}; Object.entries(fa).forEach(([k,v])=>{ const el=$('#fa-'+k); if(el) el.textContent=v; }); }
 function setFocus(f){ if(!FOCI.some(x=>x[0]===f)) return; FOCUS=f; try{ localStorage.setItem(FOCUS_KEY,f); }catch(e){}
   document.querySelectorAll('#floors button').forEach(b=>{ b.classList.toggle('on',b.dataset.f===f); b.setAttribute('aria-selected',b.dataset.f===f); }); updateTitle(); applyFocusVisibility(); syncEnv();
   inert=null; if(mode==='orbit') fitOrbit(true); else if(mode==='plan'){ fitPlan(); planFitted=FOCUS; } if(mode==='walk'){ startWalk(); wk.started=true; } else wk.started=false; dirty(true); } // Walk after picking a level starts on that level

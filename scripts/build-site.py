@@ -7,17 +7,17 @@ src=open(os.path.join(ROOT,'src','app.html')).read()
 cut=src.index('</style>')+len('</style>')
 head, body=src[:cut], src[cut:].lstrip('\n')
 SITE='https://tuhaye-build.vercel.app/'
-desc='A to-scale 3D model of the Tuhaye house, both levels and the theater: walk through every room, move furniture, try TV sizes, floors and lighting.'
+desc='Ridgeline Residence: an interactive, to-scale 3D walkthrough built from the architectural plans. Tour the exterior, walk every room on both levels, try furniture layouts, finishes and lighting.'
 meta=f'''<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="{desc}">
-<meta name="theme-color" content="#e9edf0" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#101418" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f1f1ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16191c" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Tuhaye house walkthrough">
+<meta property="og:title" content="Ridgeline Residence · Interactive 3D walkthrough">
 <meta property="og:description" content="{desc}">
 <meta property="og:url" content="{SITE}">
 <meta property="og:image" content="{SITE}preview.jpg">

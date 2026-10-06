@@ -1,11 +1,13 @@
-# Tuhaye house walkthrough
+# Ridgeline Residence
 
-A to-scale 3D model of the whole house, both levels, built from the plan set:
+An interactive, to-scale 3D walkthrough of a mountain-modern home, both levels, built from its architectural plan set. "Ridgeline Residence" is a placeholder project name (set as `PROJECT` in `data/house.js`, plus the page title, loading screen and welcome panel in `src/app.html`, and `scripts/build-site.py`).
+
+It is built from:
 
 - **A2.1** main level and **A2.2** lower level floor plans (3/16″ = 1′-0″): every wall, door, window, room, stair, deck and terrace.
 - **A4.1–A4.4** building sections: ceiling heights, vaulted and sloped ceilings, plate heights, roof slopes.
 - **A3.1–A3.3** exterior elevations: roofs (1:12 shed roofs and low-slope roofs), chimneys, siding, stone, window heights and the grade.
-- **Theater 113** (with the former Mech #2 opened into it) is the same detailed, adjustable room as before, from sheet 8 at ¼″ = 1′-0″.
+- **The theater** (with the former mechanical room opened into it) is a detailed, adjustable room from its enlarged plan at ¼″ = 1′-0″.
 
 Walk through any room, go up and down the stairs, step out onto the decks, move and add furniture on either level, try TV sizes,
 floors, wall colors and lighting, and save layouts.
@@ -14,10 +16,9 @@ floors, wall colors and lighting, and save layouts.
 
 ## Using it
 
-- The buttons on the left pick what you see: **Outside** (the whole house and site), **Main**, **Lower**, or just the **Theater**.
-- **3D** spins a model, **Walk** puts you inside at eye height, **Plan** is a floor plan with room names.
-- The light button switches the theater between Bright, Dim and Movie, and the rest of the house between midday, evening and dusk.
-- The house opens furnished with "Layout 1" (Fletcher's theater plus furniture in every room). Those pieces are ordinary furniture: move, change or delete them.
+- The control card at the top left picks the **View** (**3D** spins the model, **Walk** puts you inside at eye height, **Plan** is the floor plan with room names) and the **Level** (**Exterior**, **Main level**, **Lower level** or the **Theater**). On a phone the same controls sit in two rows across the top.
+- The dock along the bottom has **Add**, **Layouts**, **Finishes** (the theater's floor, walls, ceiling and size), the light button (midday, evening and dusk outside; Bright, Dim and Movie in the theater) and **Undo**.
+- The house opens furnished with "Layout 1" (the furnished theater plus furniture in every room). Those pieces are ordinary furniture: move, change or delete them.
 - Furniture is locked so looking around never moves anything. Tap **Edit furniture** to move, add or delete pieces, and **Done editing** to lock them again.
 
 ## What's here
@@ -49,5 +50,5 @@ Import the repo in Vercel and keep the defaults: framework preset **Other**, no 
 
 - Layouts saved on the site live in that browser (local storage), so each person's saves stay on their own phone or computer.
 - **Layouts → Send link to this layout** puts the whole layout in the link (`#L=…`). Whoever opens it sees that exact layout and can save it.
-- The page opens to "Layout 1" (embedded in `src/app.html` as `DEFAULT_LAYOUT`: Fletcher's theater plus the furniture for the rest of the house), unless that browser has unsaved changes.
-- Graphics: **Room → Graphics** switches between Photo-real (HDR, ambient occlusion, soft shadows that refine when the view is still) and Fast.
+- The page opens to "Layout 1" (embedded in `src/app.html` as `DEFAULT_LAYOUT`: the furnished theater plus the furniture for the rest of the house), unless that browser has unsaved changes.
+- Picture quality: **Finishes → Picture quality** switches between Photo-real (HDR, ambient occlusion, soft shadows that refine when the view is still) and Fast.
