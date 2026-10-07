@@ -1107,7 +1107,9 @@ let gltfP=null;
 function afterLoad(f){ if(document.readyState==='complete') setTimeout(f,0); else addEventListener('load', ()=>setTimeout(f,0), {once:true}); }
 function gltfLoader(){ if(!gltfP) gltfP=new Promise(go=>afterLoad(go)).then(()=>new Promise((res,rej)=>{ if(THREE.GLTFLoader) return res(new THREE.GLTFLoader()); const s=document.createElement('script'); s.src=MODEL_BASE+'GLTFLoader.js'; s.onload=()=>THREE.GLTFLoader?res(new THREE.GLTFLoader()):rej(new Error('loader')); s.onerror=rej; document.head.appendChild(s); })); return gltfP; }
 function loadModel(key){ const m=MODELS[key]; if(m.p) return m.p;
-  m.p=gltfLoader().then(L=>new Promise((res,rej)=>L.load(MODEL_BASE+m.f, res, undefined, rej))).then(gl=>{ const root=gl.scene; root.updateMatrixWorld(true);
+  const viaJson=L=>fetch(MODEL_BASE+m.f.replace(/\.glb$/,'.json')).then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); }).then(j=>new Promise((res,rej)=>{ // hosts that do not serve .glb get the same bytes as base64 in a .json
+    const s=atob(j.glb), u=new Uint8Array(s.length); for(let i=0;i<s.length;i++) u[i]=s.charCodeAt(i); L.parse(u.buffer, MODEL_BASE, res, rej); }));
+  m.p=gltfLoader().then(L=>new Promise((res,rej)=>L.load(MODEL_BASE+m.f, res, undefined, rej)).catch(()=>viaJson(L))).then(gl=>{ const root=gl.scene; root.updateMatrixWorld(true);
     root.traverse(o=>{ if(!o.isMesh) return; o.castShadow=o.receiveShadow=true; o.geometry.userData.keep=true; o.raycast=()=>{}; // quantized vertices: picking uses a proxy box instead
       [].concat(o.material).forEach(mm=>{ mm.userData.keepUV=true; mm.userData.env=.75; MODEL_MATS.add(mm); ['map','normalMap','roughnessMap','metalnessMap','aoMap','emissiveMap'].forEach(k=>{ if(mm[k]) mm[k].anisotropy=maxAniso; }); }); });
     m.box=new THREE.Box3().setFromObject(root); m.scene=root; m.ready=true; return m; });
