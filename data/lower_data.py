@@ -99,8 +99,8 @@ W=[
  (31.49,100.5,38.57,100.97,'w'),        # WC north (lobby south, ART wall)
  (13.03,100.97,13.69,101.3,'w',dict(wain=2.0)),        # bunk room west (egress 41a/41b)
  (13.03,109.92,13.69,116.83,'w',dict(wain=2.0)),
- (13.03,116.83,32.5,117.5,'w'),         # south wall (window 42 TEMP)
- (34.5,116.83,38.57,117.5,'w'),
+ (13.03,116.83,32.5,117.5,'w',dict(wain=2.0)),   # south wall: stone base up to 2 ft (A3.3), window 42
+ (34.5,116.83,38.57,117.5,'w',dict(wain=2.0)),
  (31.49,100.97,31.95,105.42,'w'),       # bunk room | WC + bath (barn 114)
  (31.49,108.67,31.95,116.83,'w'),
  (31.95,104.08,32.2,104.42,'w'),        # WC south (pocket 115)

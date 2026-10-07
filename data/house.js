@@ -168,6 +168,7 @@ function prism(B,L,x0,z0,x1,z1,y0,topF,ext,opt={}){
       const zn=m===HM.paint&&L.key==='M'&&!opt.face&&roomAt(L,p[0],p[1])?(zoneAt(p[0],p[1])||{f:()=>YM+9}):null, cs=zn?[a,b].map(q=>zn.f(...(ax?[q,bf+sg*.3]:[bf+sg*.3,q]))):null; // that room's ceiling
       if(cs&&(ta>cs[0]+.03||tb>cs[1]+.03)){ const ca=Math.max(y0,Math.min(ta,cs[0])), cb=Math.max(y0,Math.min(tb,cs[1]));
         quadF(B,m,V(a,y0,bf),V(b,y0,bf),V(b,cb,bf),V(a,ca,bf),dir); quadF(B,ext,V(a,ca,bf),V(b,cb,bf),V(b,tb,bf),V(a,ta,bf),dir); }
+      else if(band&&band.y>=Math.min(ta,tb)) quadF(B,band.m,V(a,y0,bf),V(b,y0,bf),V(b,tb,bf),V(a,ta,bf),dir);
       else if(band&&band.y>y0&&band.y<Math.min(ta,tb)){ quadF(B,band.m,V(a,y0,bf),V(b,y0,bf),V(b,band.y,bf),V(a,band.y,bf),dir); quadF(B,m,V(a,band.y,bf),V(b,band.y,bf),V(b,tb,bf),V(a,ta,bf),dir); }
       else quadF(B,m,V(a,y0,bf),V(b,y0,bf),V(b,tb,bf),V(a,ta,bf),dir);
       if(opt.base&&m===HM.paint){ const r=roomAt(L,p[0],p[1]); if(r&&!r.nf) baseRun(ax,a,b,bf,sg,L.y+r.dy); } }
@@ -190,12 +191,19 @@ function buildWalls(L,B){ const main=L.key==='M';
         const r=roomAt(L,q[0],q[1]); if(w.o.wain) return {y:YM+w.o.wain,m:HM.stone}; if(!lowerSolid(p[0],p[1])) return {y:YM,m:ext};
         const lw=wallAt(HL.L,p[0],p[1]); return {y:YM+(r?r.dy:0), m:lw?extMat(HL.L,lw):shellAt(p[0],p[1])?HM.stone:ext}; }; // the floor band matches the wall below it
     const ends=p=>{ const o=openAt(L,p[0],p[1]); return o?voidsOf(L,o).v:null; };
-    prism(B,L,w.x0,w.z0,w.x1,w.z1,y0,topF,ext,{band, base:true, bot:main?HM.soffit:null, ends}); });
+    prism(B,L,w.x0,w.z0,w.x1,w.z1,y0,topF,ext,{band, base:true, bot:main?HM.soffit:null, ends}); skirt(B,L,w.x0,w.z0,w.x1,w.z1,y0); });
   L.walls.forEach(w=>{ const yb=main?(YM+(roomAt(L,(w.x0+w.x1)/2,(w.z0+w.z1)/2+2)||{dy:0}).dy):L.y;
     if(w.k==='g') glassWall(B,w,yb+.0,yb+(w.o.h||7.5));
     if(w.k==='p'){ let top=w.o.top!=null?w.o.top-6766.5:yb+9; if(CUTM!=null) top=Math.min(top,CUTM); const em=extMat(L,w); prism(B,L,w.x0,w.z0,w.x1,w.z1,main?CUT:L.y,top,em,{face:(sg,p)=>roomAt(L,p[0],p[1])?HM.paint:em, cap:null}); /* painted where it faces into a room */ hbox(B,HM.fascia,w.x0-.15,top,w.z0-.15,w.x1+.15,top+.25,w.z1+.15); }
     if(w.k==='v'){ hbox(B,{px:HM.stone,nx:HM.stone,pz:HM.stone,nz:HM.stone,py:HM.cap,ny:null},w.x0,L.y,w.z0,w.x1,L.y+9,w.z1); firebox(B,{x0:sX(22.8),x1:sX(27.7),z:w.z0,dir:-1,ax:'x',y:L.y+1.6,h:1.1}); } // the linear fireplace, TV above
     if(w.k==='fp') fireplace(B,L,w); }); }
+/* the stone base: wherever the ground falls away below a wall's foot, the wall carries on down in stone to below grade, the way the
+   elevations draw the house sitting into its slope (and so the hollow under the floors never shows) */
+function outsideAt(x,z,only){ for(const L of only?[only]:[HL.L,HL.M]) if(roomAt(L,x,z)||wallAt(L,x,z)||openAt(L,x,z)) return false; return !(POLY.length&&inPoly(x,z,POLY)); } // (a lower wall under a cantilevered room above is still outdoors at its foot)
+function groundBy(x0,z0,x1,z1,off,only){ const ax=(x1-x0)>=(z1-z0), n=Math.max(1,Math.ceil((ax?x1-x0:z1-z0)/1.5)); let g=Infinity;
+  for(let i=0;i<=n;i++){ const t=i/n; for(const sg of [-1,1]){ const x=ax?x0+(x1-x0)*t:(sg<0?x0:x1)+sg*off, z=ax?(sg<0?z0:z1)+sg*off:z0+(z1-z0)*t; if(outsideAt(x,z,only)) g=Math.min(g,grade(x,z)); } } return g; }
+function skirt(B,L,x0,z0,x1,z1,top){ const cx=(x0+x1)/2, cz=(z0+z1)/2; if(L.key==='M'&&(lowerSolid(cx,cz)||roomAt(HL.L,cx,cz))) return; // a lower wall already carries it
+  const g=groundBy(x0,z0,x1,z1,.6,L.key==='L'?HL.L:null); if(!(g<top-.02)||(L.key==='M'&&g<top-5)) return; /* a main-level wall well above the ground is a cantilever: it stays open below */ prism(B,L,x0,z0,x1,z1,g-1.5,top+.02,HM.stone,{face:()=>HM.stone, cap:null}); }
 function glassWall(B,w,y0,y1){ const ax=(w.x1-w.x0)>=(w.z1-w.z0), m=(w.x0+w.x1)/2, n=(w.z0+w.z1)/2;
   if(ax) hbox(B,HM.glass,w.x0,y0,n-.02,w.x1,y1,n+.02); else hbox(B,HM.glass,m-.02,y0,w.z0,m+.02,y1,w.z1);
   if(ax) hbox(B,HM.frame,w.x0,y1-.04,n-.04,w.x1,y1+.04,n+.04); else hbox(B,HM.frame,m-.04,y1-.04,w.z0,m+.04,y1+.04,w.z1); }
@@ -229,7 +237,8 @@ function buildOpenings(L,B){ const main=L.key==='M';
   L.opens.forEach(o=>{ const ax=(o.x1-o.x0)>=(o.z1-o.z0), half=Math.min(o.x1-o.x0,o.z1-o.z0)/2, wref=plain(wallAt(L,ax?o.x0-.05:(o.x0+o.x1)/2,ax?(o.z0+o.z1)/2:o.z0-.05))||plain(wallAt(L,ax?o.x1+.05:(o.x0+o.x1)/2,ax?(o.z0+o.z1)/2:o.z1+.05));
     const ext=extMat(L,wref), y0=main?CUT:L.y, {fl,v}=voidsOf(L,o), topF=(x,z)=>topFor(L,x,z,ax?0:1,ax?1:0,half);
     const e=.03, r=ax?[o.x0-e,o.z0,o.x1+e,o.z1]:[o.x0,o.z0-e,o.x1,o.z1+e]; // overlaps the walls beside it a little, so no hairline crack opens at the joint
-    let cur=y0; v.forEach(([lo,hi])=>{ if(lo>cur+.01) prism(B,L,...r,cur,lo,ext,{noEnds:true, base:o.t==='win', cap:HM.trim}); cur=hi; });
+    const wain=!main&&wref&&wref.o.wain?()=>({y:L.y+wref.o.wain,m:HM.stone}):null; skirt(B,L,...r,y0);
+    let cur=y0; v.forEach(([lo,hi])=>{ if(lo>cur+.01) prism(B,L,...r,cur,lo,ext,{noEnds:true, base:o.t==='win', cap:HM.trim, band:wain}); cur=hi; });
     prism(B,L,...r,cur,topF,ext,{noEnds:true, bot:HM.paint});
     if(DOORISH.has(o.t)) hpoly(B,o.t==='garage'?HM.concrete:HM.wood,[[o.x0,o.z0],[o.x1,o.z0],[o.x1,o.z1],[o.x0,o.z1]],fl+.005,1);
     fillOpening(B,L,o,v,ax,fl); }); }
@@ -329,6 +338,9 @@ function rail(B,x0,z0,x1,z1,y0,y1){ const len=Math.hypot(x1-x0,z1-z0); if(len<.3
 
 /* ---------- decks, terraces and the site ---------- */
 function buildDecks(B){ HOUSE.decks.forEach(d=>{ const p=d.poly.map(([X,Z])=>[sX(X),sZ(Z)]), m=d.k==='pavers'?HM.pavers:d.k==='concrete'?HM.concrete:HM.deck; hpoly(B,m,p,d.y,1); hpoly(B,HM.soffit,p,d.y-1,-1);
+  if(d.k) p.forEach((a,i)=>{ const b=p[(i+1)%p.length], dx=b[0]-a[0], dz=b[1]-a[1], l=Math.hypot(dx,dz); if(l<.05) return; const nx=dz/l, nz=-dx/l, mx=(a[0]+b[0])/2, mz=(a[1]+b[1])/2, out=inPoly(mx+nx*.1,mz+nz*.1,p)?-1:1, ox=nx*out*.6, oz=nz*out*.6;
+    const fs=[.1,.5,.9].filter(f=>outsideAt(a[0]+dx*f+ox,a[1]+dz*f+oz)); if(!fs.length) return; const g=Math.min(...fs.map(f=>grade(a[0]+dx*f+ox,a[1]+dz*f+oz)));
+    if(g<d.y-1.02) quadF(B,HM.stone,[a[0],g-1.5,a[1]],[b[0],g-1.5,b[1]],[b[0],d.y-1,b[1]],[a[0],d.y-1,a[1]],[nx*out,0,nz*out]); }); // on-grade slabs sit on a stone wall where the ground drops
     p.forEach((a,i)=>{ const b=p[(i+1)%p.length], dx=b[0]-a[0], dz=b[1]-a[1], l=Math.hypot(dx,dz), nx=dz/l, nz=-dx/l, mx=(a[0]+b[0])/2, mz=(a[1]+b[1])/2, out=inPoly(mx+nx*.1,mz+nz*.1,p)?-1:1;
       quadF(B,HM.fascia,[a[0],d.y-1,a[1]],[b[0],d.y-1,b[1]],[b[0],d.y+.02,b[1]],[a[0],d.y+.02,a[1]],[nx*out,0,nz*out]);
       const px=mx+nx*out*.6, pz=mz+nz*out*.6, against=roomAt(HL.M,px,pz)||wallAt(HL.M,px,pz)||openAt(HL.M,px,pz)||HOUSE.chim.some(c=>inRect({x0:sX(c.r[0]),x1:sX(c.r[1]),z0:sZ(c.r[2]),z1:sZ(c.r[3])},px,pz,.3));
@@ -337,15 +349,16 @@ function buildDecks(B){ HOUSE.decks.forEach(d=>{ const p=d.poly.map(([X,Z])=>[sX
         else rail(B,a[0]+ix,a[1]+iz,b[0]+ix,b[1]+iz,d.y,d.y); } }); }); }
 function buildSite(Bl,Bm){ const P=a=>a.map(([X,Z])=>[sX(X),sZ(Z)]), R=r=>({x0:sX(r[0]),x1:sX(r[1]),z0:sZ(r[2]),z1:sZ(r[3])});
   HOUSE.ter.forEach(t=>{ const p=P(t.poly); hpoly(Bl,HM.pavers,p,t.y,1); p.forEach((a,i)=>{ const b=p[(i+1)%p.length], dx=b[0]-a[0], dz=b[1]-a[1], l=Math.hypot(dx,dz), nx=dz/l, nz=-dx/l, mx=(a[0]+b[0])/2, mz=(a[1]+b[1])/2, out=inPoly(mx+nx*.1,mz+nz*.1,p)?-1:1;
-    quadF(Bl,HM.stone,[a[0],t.y-3,a[1]],[b[0],t.y-3,b[1]],[b[0],t.y,b[1]],[a[0],t.y,a[1]],[nx*out,0,nz*out]); }); });
-  HOUSE.swall.forEach(w=>{ const r=R(w.r); hbox(Bl,{px:HM.stone,nx:HM.stone,pz:HM.stone,nz:HM.stone,py:HM.fascia,ny:null},r.x0,w.top-4,r.z0,r.x1,w.top,r.z1); });
+    const yb=Math.min(t.y-3,...[0,.5,1].map(f=>grade(a[0]+dx*f+nx*out*.6,a[1]+dz*f+nz*out*.6)-1)); quadF(Bl,HM.stone,[a[0],yb,a[1]],[b[0],yb,b[1]],[b[0],t.y,b[1]],[a[0],t.y,a[1]],[nx*out,0,nz*out]); }); });
+  HOUSE.swall.forEach(w=>{ const r=R(w.r), gb=Math.min(...[[r.x0-.6,r.z0-.6],[r.x1+.6,r.z0-.6],[r.x0-.6,r.z1+.6],[r.x1+.6,r.z1+.6],[(r.x0+r.x1)/2,(r.z0+r.z1)/2]].map(([x,z])=>grade(x,z)))-1;
+    hbox(Bl,{px:HM.stone,nx:HM.stone,pz:HM.stone,nz:HM.stone,py:HM.fascia,ny:null},r.x0,Math.min(w.top-4,gb),r.z0,r.x1,w.top,r.z1); });
   HOUSE.plant.forEach(pl=>{ const r=R(pl.r); if(pl.wall!=null) hbox(Bm,{px:HM.stone,nx:HM.stone,pz:HM.stone,nz:HM.stone,py:HM.fascia,ny:null},r.x0,YM-1,r.z0,r.x1,pl.wall,r.z1); hbox(pl.wall!=null?Bm:Bl,{py:HM.soil,px:null,nx:null,pz:null,nz:null,ny:null},r.x0+(pl.wall!=null?.6:0),pl.y-1,r.z0+(pl.wall!=null?.6:0),r.x1-(pl.wall!=null?.6:0),pl.y,r.z1-(pl.wall!=null?.6:0)); const q=RNG(77); for(let z=r.z0+1.2;z<r.z1-1;z+=2.2+q()*1.5){ const s=.9+q()*.8, g=new THREE.Mesh(icoG(1),HM.shrub); g.position.set((r.x0+r.x1)/2+(q()-.5)*1.5,pl.y+s*.55,z); g.scale.set(s,.8*s,s); g.castShadow=g.receiveShadow=true; LEAVES.push(g); } });
-  HOUSE.piers.forEach(p=>{ const r=R(p.r); hbox(Bm,HM.stone,r.x0,p.y0,r.z0,r.x1,p.y1,r.z1); });
+  HOUSE.piers.forEach(p=>{ const r=R(p.r), y0=Math.min(p.y0,...[[r.x0,r.z0],[r.x1,r.z0],[r.x0,r.z1],[r.x1,r.z1]].map(([x,z])=>grade(x,z)-.5)); hbox(Bm,HM.stone,r.x0,y0,r.z0,r.x1,p.y1,r.z1); });
   (HOUSE.rwalls||[]).forEach(([X0,Z0,X1,Z1,th,t0,t1])=>{ const a=[sX(X0),sZ(Z0)], b=[sX(X1),sZ(Z1)], dx=b[0]-a[0], dz=b[1]-a[1], l=Math.hypot(dx,dz), nx=-dz/l*th/2, nz=dx/l*th/2, y0=Math.min(grade(...a),grade(...b))-3;
     const A0=[a[0]+nx,a[1]+nz], A1=[a[0]-nx,a[1]-nz], B0=[b[0]+nx,b[1]+nz], B1=[b[0]-nx,b[1]-nz];
     quadF(Bm,HM.stone,[A0[0],y0,A0[1]],[B0[0],y0,B0[1]],[B0[0],t1,B0[1]],[A0[0],t0,A0[1]],[nx,0,nz]); quadF(Bm,HM.stone,[A1[0],y0,A1[1]],[B1[0],y0,B1[1]],[B1[0],t1,B1[1]],[A1[0],t0,A1[1]],[-nx,0,-nz]);
     quadF(Bm,HM.fascia,[A0[0],t0,A0[1]],[B0[0],t1,B0[1]],[B1[0],t1,B1[1]],[A1[0],t0,A1[1]],[0,1,0]); [[A0,A1,a,-1],[B0,B1,b,1]].forEach(([P,Q,c,sg])=>quadF(Bm,HM.stone,[P[0],y0,P[1]],[Q[0],y0,Q[1]],[Q[0],sg<0?t0:t1,Q[1]],[P[0],sg<0?t0:t1,P[1]],[dx*sg,0,dz*sg])); });
-  HOUSE.posts.forEach(([X,Z,y0,y1,s])=>hbox(Bm,HM.steel,sX(X)-s/2,y0,sZ(Z)-s/2,sX(X)+s/2,y1,sZ(Z)+s/2));
+  HOUSE.posts.forEach(([X,Z,y0,y1,s])=>{ if(y0<YM-1) y0=Math.min(y0,grade(sX(X),sZ(Z))-.3); hbox(Bm,HM.steel,sX(X)-s/2,y0,sZ(Z)-s/2,sX(X)+s/2,y1,sZ(Z)+s/2); }); // posts stand on the ground
   { const r=R(HOUSE.spa.r), t=HOUSE.spa.top; hbox(Bl,{px:HM.spa,nx:HM.spa,pz:HM.spa,nz:HM.spa,py:null,ny:null},r.x0,-2.5,r.z0,r.x1,t,r.z1); hbox(Bl,HM.spa,r.x0,t,r.z0,r.x1,t+.08,r.z0+.5); hbox(Bl,HM.spa,r.x0,t,r.z1-.5,r.x1,t+.08,r.z1); hbox(Bl,HM.spa,r.x0,t,r.z0,r.x0+.5,t+.08,r.z1); hbox(Bl,HM.spa,r.x1-.5,t,r.z0,r.x1,t+.08,r.z1); hpoly(Bl,HM.water,[[r.x0+.5,r.z0+.5],[r.x1-.5,r.z0+.5],[r.x1-.5,r.z1-.5],[r.x0+.5,r.z1-.5]],t-.25,1); }
   { const f=HOUSE.fire, r=R(f.r); hbox(Bm,HM.stone,r.x0,f.y,r.z0,r.x1,f.y+f.h,r.z1); hbox(Bm,HM.ballast,r.x0+.6,f.y+f.h,r.z0+.6,r.x1-.6,f.y+f.h+.05,r.z1-.6); hbox(Bm,HM.fire,(r.x0+r.x1)/2-.06,f.y+f.h+.05,r.z0+1.2,(r.x0+r.x1)/2+.06,f.y+f.h+.3,r.z1-1.2); }
   { const b=HOUSE.bbq, r=R(b.r); hbox(Bm,HM.stone,r.x0,b.y,r.z0,r.x1,b.y+b.h,r.z1); hbox(Bm,HM.fascia,r.x0-.1,b.y+b.h,r.z0-.1,r.x1+.1,b.y+b.h+.12,r.z1+.1); hbox(Bm,HM.steel,r.x0+.1,b.y+b.h+.12,r.z0+1.4,r.x1-.1,b.y+b.h+.75,r.z1-1.4); } }
@@ -353,7 +366,7 @@ let LAWN=null; // the grass is walkable wherever the house, terraces and walls a
 function onLawn(x,z){ const L=LAWN; if(!L||x<L.X0||z<L.Z0||x>L.X1||z>L.Z1) return false; const u=Math.floor((x-L.X0)*L.PX), v=Math.floor((z-L.Z0)*L.PX); if(u<0||v<0||u>=L.W||v>=L.H) return false; const i=(v*L.W+u)*4; return L.img[i]<128&&!(L.img[i+2]>128&&grade(x,z)>YM-3); }
 /* terrain: grade sampled from the elevation sheets, smoothed between points, cut away wherever the house, terraces or driveway sit */
 const TPTS=HOUSE.terrain.map(([X,Z,y])=>[sX(X),sZ(Z),y]);
-function grade(x,z){ let s=0, w=0; for(const [px,pz,py] of TPTS){ const d2=(x-px)*(x-px)+(z-pz)*(z-pz)+1; const k=1/(d2*d2); s+=py*k; w+=k; } return s/w; }
+function grade(x,z){ let s=0, w=0; for(const [px,pz,py] of TPTS){ const d2=(x-px)*(x-px)+(z-pz)*(z-pz)+9; const k=1/(d2*d2); s+=py*k; w+=k; } return s/w; } // softened inverse-distance blend: no dimples around the survey points
 function buildTerrain(group){ const X0=sX(-60), X1=sX(175), Z0=sZ(-60), Z1=sZ(185), C=1.25, nx=Math.ceil((X1-X0)/C), nz=Math.ceil((Z1-Z0)/C), PX=2, W=Math.ceil((X1-X0)*PX), H=Math.ceil((Z1-Z0)*PX);
   const [cv,g]=cnv(W,H), path=(pts)=>{ g.beginPath(); pts.forEach(([x,z],i)=>{ const u=(x-X0)*PX, v=(z-Z0)*PX; i?g.lineTo(u,v):g.moveTo(u,v); }); g.closePath(); g.fill(); }, rect=r=>path([[r.x0,r.z0],[r.x1,r.z0],[r.x1,r.z1],[r.x0,r.z1]]);
   g.fillStyle='#000'; g.fillRect(0,0,W,H); g.fillStyle='#0f0'; path(HOUSE.drive.map(([X,Z])=>[sX(X),sZ(Z)]));
