@@ -7,14 +7,14 @@ const HERE=path.dirname(fileURLToPath(import.meta.url)), ROOT=path.resolve(HERE,
 const APP=path.join(ROOT,'src','app.html'), THREE=path.join(HERE,'vendor','three-r128.min.js');
 const { chromium } = await import(process.env.PLAYWRIGHT || 'playwright');
 const CHROMIUM=process.env.CHROMIUM || undefined;
-fs.mkdirSync(OUT,{recursive:true}); process.chdir(OUT); // wrapped pages and screenshots land in tests/out
+fs.mkdirSync(OUT,{recursive:true}); process.chdir(OUT); for(const d of ['tex','models']) try{ fs.symlinkSync('../../'+d, d); }catch(e){} // the scanned textures and models, beside the wrapped pages // wrapped pages and screenshots land in tests/out
 let body = fs.readFileSync(APP,'utf8');
 const hook = `window.__t={PRESETS, items, byId, select, dimsOf, st:()=>({mode, selId, OG:{...OG}, orbit:{...orbit}}), w2s:(x,y,z)=>{ applyCamera(); _v.set(x,y,z).project(camera); const r=canvas.getBoundingClientRect(); return {x:r.left+(_v.x+1)/2*r.width, y:r.top+(1-_v.y)/2*r.height}; }, info:()=>renderer.info.render.calls};\n`;
 body = body.replace('requestAnimationFrame(loop);\n})();', hook+'requestAnimationFrame(loop);\n})();');
 fs.writeFileSync('wrapped6.html', `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light}body{margin:0;font:14px system-ui;background:#fafafa}[hidden]{display:none!important}</style></head><body>${body}</body></html>`);
 const three = fs.readFileSync(THREE);
 const [scheme, vw, vh, full] = [process.argv[2]||'light', +(process.argv[3]||393), +(process.argv[4]||852), process.argv[5]!=='quick'];
-const browser = await chromium.launch({ executablePath: CHROMIUM, args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader'] });
+const browser = await chromium.launch({ executablePath: CHROMIUM, args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--allow-file-access-from-files'] });
 const ctx = await browser.newContext({ viewport:{width:vw,height:vh}, deviceScaleFactor:1, colorScheme:scheme, hasTouch:true, isMobile:true });
 const page = await ctx.newPage(); const errs=[];
 page.on('console', m=>{ if(m.type()==='error'||m.type()==='warning') errs.push(m.type()+': '+m.text()); }); page.on('pageerror', e=>errs.push('pageerror: '+e.message));

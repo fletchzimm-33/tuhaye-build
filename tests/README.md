@@ -2,6 +2,7 @@
 
 Browser tests that drive the page in Chromium with Playwright. They load `../src/app.html` with a few test hooks injected,
 serve three.js from `vendor/three-r128.min.js` (so no network is needed), and write wrapped pages and screenshots to `out/`.
+Each test links `out/tex` and `out/models` to the repo's own folders, so the wrapped pages find the scanned textures and models.
 
 ```sh
 cd tests

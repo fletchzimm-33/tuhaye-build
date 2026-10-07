@@ -6,11 +6,11 @@ import { fileURLToPath } from 'url';
 const HERE=path.dirname(fileURLToPath(import.meta.url)), ROOT=path.resolve(HERE,'..'), OUT=path.join(HERE,'out');
 const APP=path.join(ROOT,'src','app.html'), THREE=path.join(HERE,'vendor','three-r128.min.js');
 const { chromium } = await import(process.env.PLAYWRIGHT || 'playwright');
-fs.mkdirSync(OUT,{recursive:true}); process.chdir(OUT);
+fs.mkdirSync(OUT,{recursive:true}); process.chdir(OUT); for(const d of ['tex','models']) try{ fs.symlinkSync('../../'+d, d); }catch(e){} // the scanned textures and models, beside the wrapped pages
 let body=fs.readFileSync(APP,'utf8');
 body=body.replace('requestAnimationFrame(loop);\n})();', `window.__t={eval:c=>eval(c)};\nrequestAnimationFrame(loop);\n})();`);
 fs.writeFileSync('wrapped_ht.html', `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0}[hidden]{display:none!important}</style></head><body>${body}</body></html>`);
-const browser=await chromium.launch({ executablePath:process.env.CHROMIUM||undefined, args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader'] });
+const browser=await chromium.launch({ executablePath:process.env.CHROMIUM||undefined, args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--allow-file-access-from-files'] });
 const page=await (await browser.newContext({ viewport:{width:1100,height:760}, deviceScaleFactor:1 })).newPage();
 const errs=[]; page.on('pageerror', e=>errs.push('PAGEERR '+e.message)); page.on('console', m=>{ if(m.type()==='error') errs.push(m.text()); });
 await page.route('**/three.min.js', r=>r.fulfill({body:fs.readFileSync(THREE), contentType:'application/javascript'}));
