@@ -145,15 +145,3 @@ for i in range(3):
         til[i*tw+2:i*tw+2+tw-4, j*tw+2:j*tw+2+tw-4]=c; th[i*tw+2:i*tw+2+tw-4, j*tw+2:j*tw+2+tw-4]=1
 til[th==0]=.55; save_gray(til[:S,:S],'tile.jpg'); save_nrm(height_normals(th[:S,:S],1.5),'tile_n.jpg')
 print('all done')
-# ---------- sky: Poly Haven "noon grass" (CC0, via Filament's third_party/environments) ----------
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import hdr
-sky=hdr.read(os.path.join(SRC,'hdr/noon_grass_2k.hdr'))
-H2=sky.shape[0]; up=sky[:H2//2]; lumu=up[...,0]*.2126+up[...,1]*.7152+up[...,2]*.0722; ref=np.percentile(lumu,60)
-def srgb(x): x=np.clip(x,0,1); return np.where(x<=.0031308, x*12.92, 1.055*np.power(x,1/2.4)-.055)
-vis=sky/ref*.42; vis=vis/(1+vis*.35)              # soft shoulder so the bright sky near the sun does not clip to white
-save_rgb(resize(srgb(vis),2048,1024),'sky.jpg',q=86)
-env=np.minimum(sky/ref*.5, 6.0)                    # the sun itself is left out: the scene's own sun light and disc stand in for it
-env=np.dstack([resize(np.clip(env[...,i]/6,0,1),512,256)*6 for i in range(3)])
-# stored in a PNG as (value / 6) ^ (1/3) per channel, which keeps dark and bright parts usable in 8 bits; decoded in the page
-Image.fromarray((np.power(np.clip(env/6,0,1),1/3)*255+.5).astype(np.uint8),'RGB').save(os.path.join(OUT,'env.png'),optimize=True)
-print('sky done')

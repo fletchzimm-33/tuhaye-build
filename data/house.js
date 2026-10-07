@@ -446,11 +446,9 @@ const dayOf=()=>DAYS[S.light]||DAYS.bright;
 const SKY_R=420, sky=(()=>{ const g=new THREE.SphereGeometry(SKY_R,32,16);
   g.setAttribute('color',new THREE.Float32BufferAttribute(new Float32Array(g.attributes.position.count*3),3)); const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({vertexColors:true, side:THREE.BackSide, fog:false})); m.raycast=()=>{}; m.renderOrder=-5; m.frustumCulled=false; m.onBeforeRender=(r,s,cam)=>{ m.position.copy(cam.position); m.updateMatrixWorld(); }; m.castShadow=m.receiveShadow=false; scene.add(m); return m; })();
 let SKY_PAINTED=null;
-function skyGrad(D,v,out){ const [top,hor,low]=D.sky.map(col), y=v.y; if(y>=0) out.copy(hor).lerp(top,Math.pow(y,.6)); else out.copy(hor).lerp(low,Math.min(1,-y*4)); return out; }
-function paintSky(){ const D=dayOf(); if(SKY_PAINTED===D) return; SKY_PAINTED=D; const tmp=new THREE.Color(), ref=new THREE.Color(), g=sky.geometry, p=g.attributes.position, c=g.attributes.color, sd=new THREE.Vector3(...D.dir).normalize(), glow=col(D.sun), photo=!!PHOTO.sky;
-  for(let i=0;i<p.count;i++){ const v=new THREE.Vector3(p.getX(i),p.getY(i),p.getZ(i)).normalize(); skyGrad(D,v,tmp);
-    if(photo){ skyGrad(DAYS.bright,v,ref); tmp.setRGB(Math.min(1.6,tmp.r/ref.r),Math.min(1.6,tmp.g/ref.g),Math.min(1.6,tmp.b/ref.b)); } // the photo, tinted toward this time of day
-    const a=Math.max(0,v.dot(sd)); tmp.lerp(glow,Math.pow(a,12)*(photo?.3:.55)); c.setXYZ(i,tmp.r,tmp.g,tmp.b); } c.needsUpdate=true; }
+function paintSky(){ const D=dayOf(); if(SKY_PAINTED===D) return; SKY_PAINTED=D; const [top,hor,low]=D.sky.map(col), tmp=new THREE.Color(), g=sky.geometry, p=g.attributes.position, c=g.attributes.color, sd=new THREE.Vector3(...D.dir).normalize(), glow=col(D.sun);
+  for(let i=0;i<p.count;i++){ const v=new THREE.Vector3(p.getX(i),p.getY(i),p.getZ(i)).normalize(), y=v.y; if(y>=0) tmp.copy(hor).lerp(top,Math.pow(y,.6)); else tmp.copy(hor).lerp(low,Math.min(1,-y*4));
+    const a=Math.max(0,v.dot(sd)); tmp.lerp(glow,Math.pow(a,12)*.55); c.setXYZ(i,tmp.r,tmp.g,tmp.b); } c.needsUpdate=true; }
 function levelsShown(){ const walkAll=mode==='walk'; return { R:walkAll||FOCUS==='house', M:walkAll||FOCUS==='house'||FOCUS==='main', T:walkAll||FOCUS==='house'||FOCUS==='main' }; }
 function applyFocusVisibility(){ const v=levelsShown(); HG.R.visible=v.R; HG.M.visible=v.M; HG.FM.visible=v.M; HG.MW.visible=v.M&&v.R; HG.MWc.visible=v.M&&!v.R; HG.shellUp.visible=v.M; HG.T.visible=v.T; sky.visible=mode!=='plan'&&v.R;
   LABELS.forEach(L=>{ if(L.group==='room') L.hidden=FOCUS!=='theater'; });
@@ -469,19 +467,15 @@ function placeSun(){ if((ENVK||envKey())==='theater'){ const bb=bboxOf(POLY); su
   const c=new THREE.Vector3(sX(50),8,sZ(58)); sun.position.copy(c).addScaledVector(new THREE.Vector3(...dayOf().dir).normalize(),160); sun.target.position.copy(c); const sc=sun.shadow.camera, R=92; sc.left=-R; sc.right=R; sc.top=R; sc.bottom=-R; sc.near=40; sc.far=320; sc.updateProjectionMatrix(); }
 function syncEnv(force){ const k=envKey(); if(k===ENVK&&!force) return false; ENVK=k; placeSun(); PROBE.want=k==='theater'; applyLights(); return true; }
 const SKY_ENV={};
-function envGrad(D, disc){ const W=512,H=256, [c,g]=cnv(W,H), gr=g.createLinearGradient(0,0,0,H), e=D.env; gr.addColorStop(0,e[0]); gr.addColorStop(.42,e[1]); gr.addColorStop(.5,e[2]); gr.addColorStop(.53,e[3]); gr.addColorStop(1,e[4]); g.fillStyle=gr; g.fillRect(0,0,W,H);
-  const sx=W*D.disc[0], sy=H*D.disc[1]; if(disc){ const rg=g.createRadialGradient(sx,sy,1,sx,sy,40); rg.addColorStop(0,'rgba(255,250,235,1)'); rg.addColorStop(.3,'rgba(255,240,210,.5)'); rg.addColorStop(1,'rgba(255,240,210,0)'); g.fillStyle=rg; g.fillRect(0,0,W,H); }
-  const d=g.getImageData(0,0,W,H).data, f=new Float32Array(W*H*3), lin=v=>{ v/=255; return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4); };
-  for(let y=0;y<H;y++) for(let x=0;x<W;x++){ const i=(y*W+x)*4, o=(y*W+x)*3, boost=disc&&(Math.hypot(x-sx,y-sy)<6)?D.disc[2]:1; f[o]=lin(d[i])*boost; f[o+1]=lin(d[i+1])*boost; f[o+2]=lin(d[i+2])*boost; } return f; }
-function skyEnv(){ const D=dayOf(); if(SKY_ENV[D.label]) return SKY_ENV[D.label]; const W=512,H=256, G=envGrad(D,true), a=new Uint16Array(W*H*4), one=THREE.DataUtils.toHalfFloat(1), P=PHOTO.env;
-  let F=G; if(P){ /* the photographed sky, tinted toward this time of day and scaled to the same overall light, plus the sun disc */ const G0=envGrad(D,false), B=envGrad(DAYS.bright,false); F=new Float32Array(W*H*3); let sg=0, sp=0;
-    for(let i=0;i<W*H*3;i++){ F[i]=P[i]*Math.min(2,G0[i]/Math.max(1e-4,B[i])); sg+=G0[i]; sp+=F[i]; } const k=sg/Math.max(1e-6,sp); for(let i=0;i<W*H*3;i++) F[i]=F[i]*k+Math.max(0,G[i]-G0[i]); }
-  for(let y=0;y<H;y++) for(let x=0;x<W;x++){ const i=(y*W+x)*3, o=((H-1-y)*W+x)*4; a[o]=THREE.DataUtils.toHalfFloat(F[i]); a[o+1]=THREE.DataUtils.toHalfFloat(F[i+1]); a[o+2]=THREE.DataUtils.toHalfFloat(F[i+2]); a[o+3]=one; }
+function skyEnv(){ const D=dayOf(); if(SKY_ENV[D.label]) return SKY_ENV[D.label]; const W=512,H=256, [c,g]=cnv(W,H), gr=g.createLinearGradient(0,0,0,H), e=D.env; gr.addColorStop(0,e[0]); gr.addColorStop(.42,e[1]); gr.addColorStop(.5,e[2]); gr.addColorStop(.53,e[3]); gr.addColorStop(1,e[4]); g.fillStyle=gr; g.fillRect(0,0,W,H);
+  const sx=W*D.disc[0], sy=H*D.disc[1], rg=g.createRadialGradient(sx,sy,1,sx,sy,40); rg.addColorStop(0,'rgba(255,250,235,1)'); rg.addColorStop(.3,'rgba(255,240,210,.5)'); rg.addColorStop(1,'rgba(255,240,210,0)'); g.fillStyle=rg; g.fillRect(0,0,W,H);
+  const d=g.getImageData(0,0,W,H).data, a=new Uint16Array(W*H*4), lin=v=>{ v/=255; return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4); }, one=THREE.DataUtils.toHalfFloat(1);
+  for(let y=0;y<H;y++) for(let x=0;x<W;x++){ const i=(y*W+x)*4, o=((H-1-y)*W+x)*4, boost=(Math.hypot(x-sx,y-sy)<6)?D.disc[2]:1; a[o]=THREE.DataUtils.toHalfFloat(lin(d[i])*boost); a[o+1]=THREE.DataUtils.toHalfFloat(lin(d[i+1])*boost); a[o+2]=THREE.DataUtils.toHalfFloat(lin(d[i+2])*boost); a[o+3]=one; }
   const t=new THREE.DataTexture(a,W,H,THREE.RGBAFormat,THREE.HalfFloatType); t.mapping=THREE.EquirectangularReflectionMapping; t.minFilter=t.magFilter=THREE.LinearFilter; t.needsUpdate=true;
   const pm=new THREE.PMREMGenerator(renderer); SKY_ENV[D.label]=pm.fromEquirectangular(t).texture; pm.dispose(); t.dispose(); return SKY_ENV[D.label]; }
 
 /* ---------- scanned materials: photo textures (tex/) replace the drawn ones in place as they load; a missing file leaves the drawn one ---------- */
-const PHOTO={ base:'tex/', sky:null, env:null, started:false, n:0 };
+const PHOTO={ base:'tex/', started:false, n:0 };
 function photoImg(n){ return new Promise((res,rej)=>{ const im=new Image(); im.decoding='async'; im.onload=()=>res(im); im.onerror=()=>rej(n); im.src=PHOTO.base+n; }); }
 /* the lawn photo is sampled at two scales and blended, so its tiling does not show from above */
 function grassMacro(){ const m=HM.grass; if(m.userData.macro) return; m.userData.macro=true;
@@ -493,18 +487,14 @@ function grassMacro(){ const m=HM.grass; if(m.userData.macro) return; m.userData
 function loadPhotos(){ if(PHOTO.started) return; PHOTO.started=true; const T=(...a)=>a.filter(Boolean);
   const jobs=[ ['floor.jpg',T(TX.wood_floor,HM.wood.map)], ['floor_n.jpg',T(TXN.wood_floor,HM.wood.normalMap)], ['wood.jpg',T(TX.wood,TX.woodV)], ['wood_n.jpg',T(TXN.wood,TXN.woodV)],
     ['fabric.jpg',T(TX.fabric)], ['fabric_n.jpg',T(TXN.fabric)], ['plaster_n.jpg',T(TXN.paint)], ['stone.jpg',T(HT.stone.t)], ['stone_n.jpg',T(HT.stone.n)],
-    ['sky.jpg',null], ['env.png',null], ['siding.jpg',T(HT.siding.t,HT.vsiding.t)], ['siding_n.jpg',T(HT.siding.n,HT.vsiding.n)], ['grass.jpg',T(HT.grass.t)], ['grass_n.jpg',T(HT.grass.n)],
+    ['siding.jpg',T(HT.siding.t,HT.vsiding.t)], ['siding_n.jpg',T(HT.siding.n,HT.vsiding.n)], ['grass.jpg',T(HT.grass.t)], ['grass_n.jpg',T(HT.grass.n)],
     ['tile.jpg',T(TX.tile)], ['tile_n.jpg',T(TXN.tile)], ['leather.jpg',T(TX.leather)], ['leather_n.jpg',T(TXN.leather)], ['concrete.jpg',T(TX.concrete)],
     ['deck.jpg',T(HT.deck.t)], ['deck_n.jpg',T(HT.deck.n)], ['soffit.jpg',T(HT.soffit.t)], ['soffit_n.jpg',T(HT.soffit.n)], ['pavers.jpg',T(HT.pavers.t)], ['pavers_n.jpg',T(HT.pavers.n)],
     ['gravel.jpg',T(HT.gravel.t)], ['gravel_n.jpg',T(HT.gravel.n)] ];
   let next=0, done=0; const settle=()=>{ dirty(true); if(++done===jobs.length){ PROBE.want=true; dirty(true); } };
   const run=()=>{ if(next>=jobs.length) return; const [n,list]=jobs[next++];
     photoImg(n).then(im=>{ PHOTO.n++;
-      if(n==='sky.jpg'){ const t=new THREE.Texture(im); t.encoding=THREE.sRGBEncoding; t.wrapS=THREE.RepeatWrapping; t.repeat.x=-1; t.offset.x=.25; t.anisotropy=4; t.needsUpdate=true; PHOTO.sky=t;
-        const m=sky.material; m.map=t; m.needsUpdate=true; SKY_PAINTED=null; paintSky(); }
-      else if(n==='env.png'){ const W=512,H=256, [c,g]=cnv(W,H); g.drawImage(im,0,0,W,H); const d=g.getImageData(0,0,W,H).data, f=new Float32Array(W*H*3); for(let i=0;i<W*H;i++) for(let k=0;k<3;k++){ const v=d[i*4+k]/255; f[i*3+k]=v*v*v*6; }
-        PHOTO.env=f; Object.keys(SKY_ENV).forEach(k=>{ SKY_ENV[k].dispose(); delete SKY_ENV[k]; }); if(ENVK==='house') applyLights(); }
-      else list.forEach(t=>{ t.image=im; t.needsUpdate=true; });
+      list.forEach(t=>{ t.image=im; t.needsUpdate=true; });
       if(n==='grass.jpg') grassMacro(); }).catch(()=>{}).then(()=>{ settle(); run(); }); };
   for(let k=0;k<4;k++) run(); }
 

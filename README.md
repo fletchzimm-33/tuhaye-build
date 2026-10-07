@@ -30,7 +30,7 @@ floors, wall colors and lighting, and save layouts.
 | `preview.jpg`, `apple-touch-icon.png`, `icon-64.png` | Link preview image (texts, email) and icons. |
 | `src/app.html` | The source of the page. It is also the Claude artifact version (a body fragment). |
 | `data/` | The house, digitized from the plans: `lower_data.py`, `main_data.py` (walls, openings, rooms), `site_data.py` (ceilings, roofs, chimneys, stairs, decks, terraces, grade), `fixtures_data.py` (kitchen, baths, laundry, built-ins), and `house.js` (the code that builds it). |
-| `tex/` | Photo-scanned materials (floors, wood, stone, siding, decking, pavers, lawn, fabric, leather, tile) and the sky. The page starts with its own drawn textures and swaps these in once they arrive. |
+| `tex/` | Photo-scanned materials (floors, wood, stone, siding, decking, pavers, lawn, fabric, leather, tile). The page starts with its own drawn textures and swaps these in once they arrive. |
 | `models/` | Scanned furniture and décor (curved velvet sofa, velvet accent chair, pouf, potted plant, vase of flowers) as compressed glTF, plus the three.js r128 glTF loader. Fetched only when a layout uses them. |
 | `scripts/build-site.py` | Rebuilds `index.html` from `src/app.html` (adds the page shell, phone viewport, link-preview tags). |
 | `scripts/fetch-assets.sh`, `scripts/build-textures.py`, `scripts/pack-models.mjs` | Download the scanned sources, then rebuild `tex/` and `models/` from them. |
@@ -62,7 +62,7 @@ Import the repo in Vercel and keep the defaults: framework preset **Other**, no 
 The scanned materials and models are free assets; the CC-BY ones need this credit wherever the site is shown.
 
 - **Wood, tile and plaster:** ambientCG Wood049, Tiles074 and PaintedPlaster017 (CC0), via the Open3D downloads.
-- **Sky and outdoor lighting:** Poly Haven "Noon Grass" HDRI (CC0), via Google Filament. **Gravel and stone grain:** Poly Haven "Rocky Trail" (CC0), via PlayCanvas.
+- **Gravel and stone grain:** Poly Haven "Rocky Trail" (CC0), via PlayCanvas.
 - **Lawn:** "Dark grass" from OpenGameArt, via the three.js examples.
 - **Fabric:** Khronos glTF sample model SheenChair, © 2020 Wayfair LLC (CC0). **Velvet:** GlamVelvetSofa, © 2021 Wayfair LLC (CC-BY 4.0). **Leather:** SheenWoodLeatherSofa, © 2024 Darmstadt Graphics Group GmbH (CC-BY 4.0).
 - **Models:** GlamVelvetSofa, © 2021 Wayfair LLC (CC-BY 4.0); SheenChair, © 2020 Wayfair LLC (CC0); SpecularSilkPouf, © 2023 Wayfair LLC (CC-BY 4.0); DiffuseTransmissionPlant, © 2024 Darmstadt Graphics Group GmbH (CC-BY 4.0); GlassVaseFlowers (CC0). All from the [Khronos glTF Sample Assets](https://github.com/KhronosGroup/glTF-Sample-Assets).
