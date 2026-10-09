@@ -6,7 +6,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-const HERE=path.dirname(fileURLToPath(import.meta.url)), ROOT=path.resolve(HERE,'..'), OUT=path.join(HERE,'out'), DEST=path.join(ROOT,'bakeoff','views');
+const HERE=path.dirname(fileURLToPath(import.meta.url)), ROOT=path.resolve(HERE,'..'), OUT=path.join(HERE,'out'), DEST=path.join(ROOT,'bakeoff',process.env.BAKEOFF_DIR||'views'); // BAKEOFF_DIR=views-hires for a separate high-resolution set
 const APP=path.join(ROOT,'src','app.html'), THREE=path.join(HERE,'vendor','three-r128.min.js');
 const { chromium } = await import(process.env.PLAYWRIGHT || 'playwright');
 const what=process.argv[2]||'final', LONG=+(process.argv[3]||(what==='preview'?768:1536)), only=process.argv[4]?process.argv[4].split(','):null;
@@ -55,7 +55,7 @@ for(const v of VIEWS){ if(only&&!only.includes(v.name)) continue;
   else { await E(`setMode('orbit',true); Object.assign(OG,${JSON.stringify(v.orbit)}); Object.assign(orbit,OG); dirty(); 1`); }
   await settle();
   if(what==='preview'){ await page.screenshot({path:path.join(OUT,`BO-${v.name}.png`)}); console.log('preview', v.name); continue; }
-  const t0=Date.now(), cap=JSON.parse(await E(`JSON.stringify(captureView({long:${LONG}}))`)), dir=path.join(DEST,v.name); fs.mkdirSync(dir,{recursive:true});
+  const t0=Date.now(), cap=JSON.parse(await E(`JSON.stringify(captureView({long:${LONG}, passes:${+process.env.BAKEOFF_PASSES||24}}))`)), dir=path.join(DEST,v.name); fs.mkdirSync(dir,{recursive:true});
   for(const k of ['beauty','depth','lines','ids']){ const [,ext,b64]=cap[k].match(/^data:image\/(\w+);base64,(.*)$/); fs.writeFileSync(path.join(dir,`${k}.${ext==='jpeg'?'jpg':ext}`), Buffer.from(b64,'base64')); delete cap[k]; }
   fs.writeFileSync(path.join(dir,'view.json'), JSON.stringify(Object.assign({name:v.name, camera:v}, cap), null, 1));
   console.log(v.name, `${cap.w}x${cap.h}`, cap.ar, `${((Date.now()-t0)/1000).toFixed(0)}s`, cap.where.room||cap.where.level, cap.items.slice(0,6).map(i=>i.desc).join(', '));

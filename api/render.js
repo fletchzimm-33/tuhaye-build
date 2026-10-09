@@ -33,8 +33,10 @@ const INSTRUCT = scene => [
   'Keep the identical camera position, lens, framing and perspective. Keep every wall, ceiling, beam, window, door, stair, railing, fireplace, cabinet and built-in exactly where it is, with the same shape and size.',
   'Keep every piece of furniture, lamp, rug, plant and artwork in the same place, size, shape, orientation and colour. Do not add, remove, move, resize or restyle anything, and add no people, text or logos.',
   'The second image is a line drawing of the exact geometry and the third is its depth map (nearer is lighter); the photograph must line up with both.',
-  `Make the materials, lighting, shadows and reflections physically realistic. Scene: ${scene}.`,
-  'Natural, accurate colour, soft realistic light, sharp focus, high-end interior and architectural photography.',
+  `Scene: ${scene}.`,
+  'Replace every computer-generated surface with its real material: wood grain and plank seams in wood floors, woven texture and soft creases in upholstery, real rug pile, matte painted walls with subtle variation, real stone, metal and glass with true reflections.',
+  'Light it the way a camera sees a real room, in the light the scene describes: soft bounce light, gentle falloff into corners and contact shadows under every piece of furniture.',
+  'Photographed with a professional full-frame camera at f/8 with natural exposure and accurate colour; sharp, detailed, high-end architectural photography with no CGI or 3D-render look.',
 ].join(' ');
 /* The depth-locked model is not an editor: it takes a description, and the depth map holds the geometry. */
 const DESCRIBE = scene => `Professional architectural photograph, ${scene}. Physically realistic materials, soft natural light, realistic shadows and reflections, sharp focus, high dynamic range, no people, no text.`;
