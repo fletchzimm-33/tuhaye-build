@@ -43,15 +43,15 @@ STAIRS=[
  dict(n='main-land',  land=(22.48,26.5,37.95,46.5), y=5.75),
  dict(n='main-upper', ax='x', a0=26.5, a1=35.5, b=(37.95,42.05), y0=5.75, y1=11.5, nr=10, lvl='main'),
  dict(n='mud',        ax='x', a0=39.57, a1=43.57, b=(95.97,100.53), y0=11.5, y1=14.0, nr=5, lvl='main'),
- dict(n='entry',      ax='x', a0=50.6, a1=55.6, b=(58.6,66.4), y0=11.42, y1=14.42, nr=6, ext=True),
+ dict(n='entry',      ax='x', a0=51.9, a1=56.9, b=(57.2,65.9), y0=11.42, y1=14.42, nr=6, ext=True, cheeks=(1,)),   # A2.1: up 6 R @ 6", 5 T @ 12" from the covered entry to the auto court; the planter wall bounds the north side
  dict(n='spa',        ax='z', a0=66.4, a1=68.9, b=(5.0,12.5), y0=-0.5, y1=-2.0, nr=3, ext=True),
 ]
 # ---- decks (main level, y=MAIN-1/12) and terraces (lower)
 DECKS=[
  dict(n='Primary Deck', y=MAIN-1/12, poly=[(2.62,11.7),(11.0,11.7),(11.0,29.3),(2.62,29.3)], rail='WNS'),
  dict(n='View Deck', y=MAIN-1/12, poly=[(-4.4,46.2),(14.03,46.2),(14.03,64.9),(13.0,64.9),(13.0,70.3),(18.03,70.3),(18.03,87.03),(26.99,87.03),(26.99,100.53),(9.2,100.53),(9.2,70.75),(-4.4,70.75)], rail='auto'),
- dict(n='Sitting Terrace', y=MAIN-1/12, poly=[(41.0,33.6),(54.5,33.6),(54.5,58.51),(45.99,58.51),(45.99,46.96),(41.0,46.96)], k='pavers', rail='N'),
- dict(n='Covered Entry', y=MAIN-1/12, poly=[(41.0,58.51),(50.6,58.51),(50.6,66.52),(41.0,66.52)], k='pavers', rail=''),
+ dict(n='Sitting Terrace', y=MAIN-1/12, poly=[(41.0,33.6),(51.9,33.6),(51.9,58.51),(45.99,58.51),(45.99,46.96),(41.0,46.96)], k='pavers', rail='N'),
+ dict(n='Covered Entry', y=MAIN-1/12, poly=[(41.0,58.51),(51.9,58.51),(51.9,66.0),(41.0,66.0)], k='pavers', rail=''),
  dict(n='Dog Run', y=MAIN+2.0, poly=[(38.6,112.52),(56.01,112.52),(56.01,117.5),(38.6,117.5)], k='concrete', rail='WS', screen=True),
 ]
 TERRACES=[
@@ -71,9 +71,10 @@ SITEWALLS=[
  dict(r=(0.5,1.0,46.5,96.0), top=-0.4),
  dict(r=(-3.7,1.0,89.3,90.0), top=-0.4),
 ]
-PLANTERS=[ dict(r=(-3.7,0.5,46.5,89.3), y=-0.6), dict(r=(55.0,61.6,30.6,57.6), y=81.9-66.5-.4, wall=81.9-66.5, lvl='T') ]
+PLANTERS=[ dict(r=(-3.7,0.5,46.5,89.3), y=-0.6), dict(r=(51.9,61.7,30.6,57.0), y=81.9-66.5-.4, wall=81.9-66.5, lvl='T') ]
 # stone piers / columns that hold up the decks and roofs: rect, y0, y1
 PIERS=[
+ dict(r=(50.0,54.7,66.0,70.2), y0=11.0, y1=81.9-66.5),   # stone pier at the foot of the entry steps, carrying the entry roof's post (A2.1)
  dict(r=(0.5,4.4,65.8,69.5), y0=-2.0, y1=MAIN-0.2),
  dict(r=(7.6,11.6,83.9,91.1), y0=-2.0, y1=MAIN-0.2),
  dict(r=(7.0,11.0,27.0,29.0), y0=-0.5, y1=MAIN-0.2),
@@ -83,7 +84,7 @@ POSTS=[ # steel / timber posts: (X,Z,y0,y1,size)
  (-4.1,46.5,-0.6,MAIN-0.25,0.5),(-4.1,70.4,-2.0,MAIN-0.25,0.5),
  (9.5,100.2,-1.5,MAIN-0.25,0.5),(26.7,100.2,-1.5,MAIN-0.25,0.5),
  (9.5,87.6,MAIN,MAIN+9.5,0.5),(26.7,87.6,MAIN,MAIN+9.5,0.5),(9.5,100.2,MAIN,MAIN+9.5,0.5),
- (52.7,58.8,MAIN+2.9,MAIN+11.2,0.5),(52.7,66.2,MAIN+2.9,MAIN+11.2,0.5),
+ (52.6,57.25,81.9-66.5,MAIN+11.2,0.5),(52.6,66.75,81.9-66.5,MAIN+11.2,0.5),   # the entry roof's posts: on the planter wall and on the stone pier beside the steps
 ]
 SPA=dict(r=(2.0,10.6,72.9,82.0), top=-0.5)
 FIRETABLE=dict(r=(0.3,4.6,55.0,61.0), y=MAIN-1/12, h=1.5)
