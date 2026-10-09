@@ -43,7 +43,7 @@ STAIRS=[
  dict(n='main-land',  land=(22.48,26.5,37.95,46.5), y=5.75),
  dict(n='main-upper', ax='x', a0=26.5, a1=35.5, b=(37.95,42.05), y0=5.75, y1=11.5, nr=10, lvl='main'),
  dict(n='mud',        ax='x', a0=39.57, a1=43.57, b=(95.97,100.53), y0=11.5, y1=14.0, nr=5, lvl='main'),
- dict(n='entry',      ax='x', a0=51.9, a1=56.9, b=(57.2,65.9), y0=11.42, y1=14.42, nr=6, ext=True, cheeks=(1,)),   # A2.1: up 6 R @ 6", 5 T @ 12" from the covered entry to the auto court; the planter wall bounds the north side
+ dict(n='entry',      ax='x', a0=51.9, a1=57.0, b=(57.5,65.9), y0=11.42, y1=14.42, nr=6, ext=True, cheeks=(1,)),   # A2.1: up 6 R @ 6", 5 T @ 12" from the covered entry to the auto court; the planter wall bounds the north side
  dict(n='spa',        ax='z', a0=66.4, a1=68.9, b=(5.0,12.5), y0=-0.5, y1=-2.0, nr=3, ext=True),
 ]
 # ---- decks (main level, y=MAIN-1/12) and terraces (lower)
@@ -71,7 +71,7 @@ SITEWALLS=[
  dict(r=(0.5,1.0,46.5,96.0), top=-0.4),
  dict(r=(-3.7,1.0,89.3,90.0), top=-0.4),
 ]
-PLANTERS=[ dict(r=(-3.7,0.5,46.5,89.3), y=-0.6), dict(r=(51.9,61.7,30.6,57.0), y=81.9-66.5-.4, wall=81.9-66.5, lvl='T') ]
+PLANTERS=[ dict(r=(-3.7,0.5,46.5,89.3), y=-0.6), dict(r=(51.9,61.7,30.6,57.5), y=81.9-66.5-.4, wall=81.9-66.5, lvl='T') ]
 # stone piers / columns that hold up the decks and roofs: rect, y0, y1
 PIERS=[
  dict(r=(50.0,54.7,66.0,70.2), y0=11.0, y1=81.9-66.5),   # stone pier at the foot of the entry steps, carrying the entry roof's post (A2.1)
