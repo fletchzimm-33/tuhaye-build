@@ -1,5 +1,46 @@
 [
  {
+  "id": "great-room-seedream",
+  "title": "Great Room",
+  "level": "main level",
+  "light": "Midday",
+  "model": "Seedream 5.0 Flash",
+  "created": "2026-10-09",
+  "photo": "great-room-seedream.jpg",
+  "render": "great-room-seedream-3d.jpg",
+  "w": 2816,
+  "h": 1584,
+  "match": 0.837,
+  "view": {
+   "mode": "walk",
+   "focus": "main",
+   "orbit": {
+    "theta": -0.8,
+    "phi": 1.02,
+    "r": 109.7517739534378,
+    "tx": -30.713603777982456,
+    "ty": 13,
+    "tz": -41.61525751032455
+   },
+   "walk": {
+    "x": -2,
+    "z": -52.08,
+    "y": 16.833333333333332,
+    "yaw": 0.8023456932038533,
+    "pitch": -0.12
+   },
+   "plan": {
+    "cx": 0,
+    "cz": 0,
+    "vh": 40
+   },
+   "feet": 11.5,
+   "seated": false,
+   "eye": null,
+   "light": "bright"
+  }
+ },
+ {
   "id": "great-room-grok",
   "title": "Great Room",
   "level": "main level",

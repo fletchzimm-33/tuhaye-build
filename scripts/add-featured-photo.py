@@ -3,7 +3,7 @@
 
   python3 scripts/add-featured-photo.py bakeoff/views/01-great-room path/to/photo.png --model "Grok Image 2.0" [--title "Great room"]
 
-Copies the photo and the view's 3D picture into photos/ as JPEGs, and records the view (so "Go to this view" works), the room,
+Newest first. Copies the photo and the view's 3D picture into photos/ as JPEGs, and records the view (so "Go to this view" works), the room,
 the light, the model and how well the photo lines up with the 3D outline (the same measure the page uses after a render).
 """
 import argparse, datetime, json, os, re, sys
@@ -38,7 +38,7 @@ def main():
     idx_path = os.path.join(OUT, 'index.json')
     idx = json.load(open(idx_path)) if os.path.exists(idx_path) else []
     idx = [p for p in idx if p['id'] != pid]
-    idx.append({'id': pid, 'title': title, 'level': where.get('level', ''), 'light': meta.get('light', ''), 'model': a.model,
+    idx.insert(0, {'id': pid, 'title': title, 'level': where.get('level', ''), 'light': meta.get('light', ''), 'model': a.model,
                 'created': datetime.date.today().isoformat(), 'photo': pid + '.jpg', 'render': pid + '-3d.jpg', 'w': w, 'h': h,
                 'match': match, 'view': meta['view']})
     json.dump(idx, open(idx_path, 'w'), indent=1)
