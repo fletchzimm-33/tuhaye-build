@@ -2770,7 +2770,8 @@ $('#helpBtn').addEventListener('click', ()=>toggleSheet('sHelp', ()=>{}));
 
 /* ---------- Photos: "Render this view" sends the current view (captureView) to api/render.js, which has an image model turn it into a
    photograph of the same scene. Photos are kept in this browser (IndexedDB), each with the 3D picture it came from and the view to go back to. ---------- */
-const PHOTO_API='/api/render', PL={ list:[], urls:new Map(), cfg:null, busy:'', watch:new Set(), armed:null, open:null };
+const PHOTO_API='/api/render', PL={ list:[], featured:[], urls:new Map(), cfg:null, busy:'', watch:new Set(), armed:null, open:null };
+const photoById=id=>PL.list.find(x=>x.id===id)||PL.featured.find(x=>x.id===id);
 let PDBP=null;
 function pdb(){ return PDBP||(PDBP=new Promise(res=>{ try{ const r=indexedDB.open('ridgeline-photos',1); r.onupgradeneeded=()=>r.result.createObjectStore('photos',{keyPath:'id'}); r.onsuccess=()=>res(r.result); r.onerror=r.onblocked=()=>res(null); }catch(e){ res(null); } })); }
 function pdbDo(rw, fn){ return pdb().then(db=>new Promise(res=>{ if(!db) return res(null); try{ const t=db.transaction('photos',rw?'readwrite':'readonly'), q=fn(t.objectStore('photos')); t.oncomplete=()=>res(q?q.result:true); t.onerror=t.onabort=()=>res(null); }catch(e){ res(null); } })); }
@@ -2832,6 +2833,11 @@ async function photoWatch(rec){ if(PL.watch.has(rec.id)) return; PL.watch.add(re
 async function photoLoad(){ const all=await pdbDo(false, s=>s.getAll()); PL.list=(all||[]).sort((a,b)=>b.created-a.created);
   for(const p of PL.list){ if(p.status==='sending') Object.assign(p,{status:'failed', error:'The page was closed before this was sent.'}); if(p.status==='rendering') photoWatch(p); }
   syncPhotoDot(); }
+/* Featured photos ship with the site in photos/ (listed in photos/index.json by scripts/add-featured-photo.py), so every visitor sees them */
+let featP=null;
+function photoFeatured(){ return featP||(featP=(IN_CLAUDE?Promise.resolve([]):fetch('photos/index.json',{cache:'no-cache'}).then(r=>r.ok?r.json():[]).catch(()=>[])).then(list=>{
+  PL.featured=(Array.isArray(list)?list:[]).map(e=>({ id:'f:'+e.id, featured:true, status:'done', created:Date.parse(e.created+'T12:00:00')||0, where:{room:e.title, level:e.level}, light:e.light, view:e.view,
+    w:e.w, h:e.h, match:e.match, model:e.model, url:'photos/'+e.photo, renderUrl:'photos/'+e.render })); if(!$('#sPhotos').hidden) renderPhotos(); })); }
 function syncPhotoDot(){ $('#photoDot').hidden=!PL.list.some(p=>p.status==='rendering'||p.status==='sending'); }
 const CAM_SVG='<svg viewBox="0 0 24 24"><path d="M4 8.5h3.2L8.8 6h6.4l1.6 2.5H20V19H4z"/><circle cx="12" cy="13.2" r="3.4"/></svg>';
 function renderPhotos(){ syncPhotoDot(); const b=$('#photoBody'); if(!b) return; const cfg=PL.cfg, n=PL.list.filter(p=>p.status==='done').length;
@@ -2842,25 +2848,26 @@ function renderPhotos(){ syncPhotoDot(); const b=$('#photoBody'); if(!b) return;
   else if(cfg.paused) why=cfg.paused;
   else if(mode==='plan') why='Switch to 3D or Walk, frame the view you want, then render it.';
   else { can=!PL.busy; why=PL.busy||`Makes a photograph of exactly what you see: same room, same furniture in the same spots. Takes about half a minute.${cfg.left!=null?` ${cfg.left} left today.`:''}`; }
-  const card=p=>{ const st=p.status, img=st==='done'?(p.pthumb||blobUrl(p,'photo')):p.thumb, room=p.where&&(p.where.room||p.where.level)||'View';
+  const card=p=>{ const st=p.status, img=p.featured?p.url:st==='done'?(p.pthumb||blobUrl(p,'photo')):p.thumb, room=p.where&&(p.where.room||p.where.level)||'View';
     const badge=st==='done'?'':st==='failed'?'<span class="pbadge bad">Didn’t work</span>':`<span class="pbadge"><i class="spin"></i>${st==='sending'?'Sending':p.stage==='queued'?'Waiting':'Rendering'}</span>`;
-    return `<button class="pcard${st!=='done'?' pending':''}" data-pid="${p.id}"><img src="${img}" alt="">${badge}<span class="pcap"><b>${esc(room)}</b><i>${esc(when(p.created))}${p.light?' · '+esc(p.light):''}</i></span></button>`; };
+    return `<button class="pcard${p.featured?' feat':''}${st!=='done'?' pending':''}" data-pid="${p.id}"><img src="${img}" alt="">${badge}<span class="pcap"><b>${esc(room)}</b><i>${p.featured?esc(p.model||''):esc(when(p.created))}${p.light?' · '+esc(p.light):''}</i></span></button>`; };
   b.innerHTML=`<div class="pcta"><button class="btn pri go" id="pRender"${can?'':' disabled'}>${CAM_SVG}Render this view</button><p class="note">${esc(why)}</p></div>`
-    +(PL.list.length?`<div class="pgrid">${PL.list.map(card).join('')}</div>`:`<p class="note">Your photos will appear here. They stay in this browser, like saved layouts.</p>`);
+    +(PL.featured.length?`<div><div class="lab">Featured</div><div class="pgrid">${PL.featured.map(card).join('')}</div></div>`:'')
+    +`<div>${PL.featured.length?'<div class="lab">Your photos</div>':''}${PL.list.length?`<div class="pgrid">${PL.list.map(card).join('')}</div>`:`<p class="note">Your photos will appear here. They stay in this browser, like saved layouts.</p>`}</div>`;
   $('#pRender').onclick=renderThisView; b.querySelectorAll('[data-pid]').forEach(e=>e.onclick=()=>photoOpen(e.dataset.pid)); }
 /* the full-screen photo, with a slider to compare it against the 3D view */
-function photoOpen(id){ const p=PL.list.find(x=>x.id===id), v=$('#pview'); if(!p){ photoClose(); return; } PL.open=id; PL.armed=null; v.hidden=false;
+function photoOpen(id){ const p=photoById(id), v=$('#pview'); if(!p){ photoClose(); return; } PL.open=id; PL.armed=null; v.hidden=false;
   const done=p.status==='done', room=p.where&&(p.where.room||p.where.level)||'View';
-  $('#pvA').src=blobUrl(p,'render')||p.thumb; $('#pvB').src=done?blobUrl(p,'photo'):''; $('#pvB').hidden=!done; $('#pvCmpL').hidden=!done; $('#pvCmp').value=100; photoCmp(); photoFit();
+  $('#pvA').src=p.featured?p.renderUrl:(blobUrl(p,'render')||p.thumb); $('#pvB').src=p.featured?p.url:done?blobUrl(p,'photo'):''; $('#pvB').hidden=!done; $('#pvCmpL').hidden=!done; $('#pvCmp').value=100; photoCmp(); photoFit();
   $('#pvT').textContent=room+(p.where&&p.where.room&&p.where.level?' · '+p.where.level:'');
-  const notes=[new Date(p.created).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})];
+  const notes=p.featured?[`Featured · made with ${p.model||'an image model'}`]:[new Date(p.created).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})];
   if(p.status==='failed') notes.push(p.error||'This one didn’t work.'); else if(!done) notes.push('Still rendering…');
   if(done&&p.match!=null&&p.match<.5) notes.push('The photo may not match the 3D view exactly');
   if(p.sig&&p.sig!==layoutSig()) notes.push('The furniture has changed since');
   $('#pvM').textContent=notes.join(' · ');
   $('#pvDl').hidden=!done;
-  const del=$('#pvDel'); del.classList.remove('armed'); del.textContent='Delete'; }
-function photoFit(){ const p=PL.list.find(x=>x.id===PL.open); if(!p) return; const r=$('#pvWrap').getBoundingClientRect(), a=(p.w||16)/(p.h||9); let w=r.width, h=w/a; if(h>r.height){ h=r.height; w=h*a; } const st=$('#pvStage'); st.style.width=Math.round(w)+'px'; st.style.height=Math.round(h)+'px'; }
+  const del=$('#pvDel'); del.hidden=!!p.featured; del.classList.remove('armed'); del.textContent='Delete'; }
+function photoFit(){ const p=photoById(PL.open); if(!p) return; const r=$('#pvWrap').getBoundingClientRect(), a=(p.w||16)/(p.h||9); let w=r.width, h=w/a; if(h>r.height){ h=r.height; w=h*a; } const st=$('#pvStage'); st.style.width=Math.round(w)+'px'; st.style.height=Math.round(h)+'px'; }
 addEventListener('resize', ()=>{ if(PL.open) photoFit(); });
 function photoCmp(){ const v=+$('#pvCmp').value; $('#pvB').style.clipPath=`inset(0 0 0 ${100-v}%)`; $('#pview').style.setProperty('--cmp', (100-v)+'%'); $('#pview').classList.toggle('cmp', v<100); }
 function photoClose(){ $('#pview').hidden=true; PL.open=null; }
@@ -2872,13 +2879,13 @@ function photoGo(p){ const v=p&&p.view; if(!v) return; photoClose(); closeSheets
 $('#pvCmp').addEventListener('input', photoCmp);
 $('#pvX').addEventListener('click', photoClose);
 $('#pview').addEventListener('click', e=>{ if(e.target.id==='pview') photoClose(); });
-$('#pvGo').addEventListener('click', ()=>photoGo(PL.list.find(x=>x.id===PL.open)));
-$('#pvDl').addEventListener('click', ()=>{ const p=PL.list.find(x=>x.id===PL.open); if(!p||!p.photo) return; const room=p.where&&(p.where.room||p.where.level)||'View', a=document.createElement('a');
-  a.href=blobUrl(p,'photo'); a.download=`Ridgeline ${room.replace(/[^\w #-]/g,'')} ${new Date(p.created).toISOString().slice(0,10)}.${p.photo.type==='image/png'?'png':'jpg'}`; document.body.appendChild(a); a.click(); a.remove(); });
+$('#pvGo').addEventListener('click', ()=>photoGo(photoById(PL.open)));
+$('#pvDl').addEventListener('click', ()=>{ const p=photoById(PL.open); if(!p||!(p.photo||p.featured)) return; const room=p.where&&(p.where.room||p.where.level)||'View', a=document.createElement('a');
+  a.href=p.featured?p.url:blobUrl(p,'photo'); a.download=`Ridgeline ${room.replace(/[^\w #-]/g,'')} ${new Date(p.created).toISOString().slice(0,10)}.${p.photo&&p.photo.type==='image/png'?'png':'jpg'}`; document.body.appendChild(a); a.click(); a.remove(); });
 $('#pvDel').addEventListener('click', async ()=>{ const b=$('#pvDel'), id=PL.open; if(PL.armed!==id){ PL.armed=id; b.classList.add('armed'); b.textContent='Tap again to delete'; setTimeout(()=>{ if(PL.armed===id){ PL.armed=null; b.classList.remove('armed'); b.textContent='Delete'; } },3000); return; }
   PL.armed=null; photoClose(); await photoDrop(id); renderPhotos(); toast('Photo deleted'); });
 addEventListener('keydown', e=>{ if(e.key==='Escape'&&!$('#pview').hidden){ photoClose(); e.stopPropagation(); } }, true);
-$('#tPhotos').addEventListener('click', ()=>{ toggleSheet('sPhotos', renderPhotos); if(!$('#sPhotos').hidden) photoCfg(true); });
+$('#tPhotos').addEventListener('click', ()=>{ toggleSheet('sPhotos', renderPhotos); if(!$('#sPhotos').hidden){ photoCfg(true); photoFeatured(); } });
 photoLoad().then(()=>{ if(!$('#sPhotos').hidden) renderPhotos(); });
 $('#tLights').addEventListener('click', ()=>{ const order=['bright','dim','movie']; S.light=order[(order.indexOf(S.light)+1)%3]; applyLights(); save(); toast(ENVK==='house'?`Time of day: ${lightLabel()}`:`Lights: ${lightLabel()}`); });
 document.querySelectorAll('#views button').forEach(b=>b.addEventListener('click', ()=>{ const m=b.dataset.mode; setMode(m, m===mode); }));

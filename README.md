@@ -36,6 +36,7 @@ floors, wall colors and lighting, and save layouts.
 | `scripts/build-site.py` | Rebuilds `index.html` from `src/app.html` (adds the page shell, phone viewport, link-preview tags). |
 | `scripts/fetch-assets.sh`, `scripts/build-textures.py`, `scripts/pack-models.mjs` | Download the scanned sources, then rebuild `tex/` and `models/` from them. |
 | `api/render.js` | The server side of **Render this view** (a Vercel Function): holds the image service key, checks the limits, starts the job and hands back the finished photo. |
+| `photos/` | Featured photos for the Photos panel (`index.json` lists them), added with `scripts/add-featured-photo.py`. |
 | `bakeoff/`, `scripts/bakeoff-score.py`, `tests/bakeoff-views.mjs` | The image-model bake-off: ten views of the house with their guide images, and the script that scores how well each model's photos line up with them. |
 | `tests/` | Browser tests (Playwright) and a test of `api/render.js`. See `tests/README.md`. |
 
@@ -69,7 +70,9 @@ The button stays hidden until the site has a key. To switch it on, in Vercel →
 | `RENDER_MONTHLY_BUDGET` | US dollars a month; rendering pauses once the estimated spend reaches it (default 20). |
 | `KV_REST_API_URL`, `KV_REST_API_TOKEN` | An Upstash Redis database (Vercel → Storage → Marketplace, free tier), so the limits hold across Vercel's servers. Without one they are counted per server instance, which is much looser. |
 
-Then redeploy. Also set a spending limit or a prepaid balance on the fal.ai account itself as the last line of defence. Which model is the default should follow the bake-off (`bakeoff/`).
+Then redeploy. Also set a spending limit or a prepaid balance on the fal.ai account itself as the last line of defence.
+
+**Featured photos.** The Photos panel also has a Featured section that every visitor sees: photos shipped with the site in `photos/`, listed in `photos/index.json`, each next to the 3D view it was made from (so the compare slider and Go to this view work). Add one with `python3 scripts/add-featured-photo.py bakeoff/views/<view> <photo file> --model "<model name>"`, then rebuild and commit. These work without any image service key. Which model is the default should follow the bake-off (`bakeoff/`).
 
 ## How saving works on the site
 

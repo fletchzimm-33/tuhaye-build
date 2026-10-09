@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 const HERE=path.dirname(fileURLToPath(import.meta.url)), ROOT=path.resolve(HERE,'..'), OUT=path.join(HERE,'out');
 const APP=path.join(ROOT,'src','app.html'), THREE=path.join(HERE,'vendor','three-r128.min.js');
 const { chromium } = await import(process.env.PLAYWRIGHT || 'playwright');
-fs.mkdirSync(OUT,{recursive:true}); process.chdir(OUT); for(const d of ['tex','models']) try{ fs.symlinkSync('../../'+d, d); }catch(e){}
+fs.mkdirSync(OUT,{recursive:true}); process.chdir(OUT); for(const d of ['tex','models','photos']) try{ fs.symlinkSync('../../'+d, d); }catch(e){}
 let body=fs.readFileSync(APP,'utf8');
 body=body.replace('requestAnimationFrame(loop);\n})();', `window.__t={eval:c=>eval(c)};\nrequestAnimationFrame(loop);\n})();`);
 fs.writeFileSync('wrapped_photos.html', `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0}[hidden]{display:none!important}</style></head><body>${body}</body></html>`);
@@ -44,20 +44,31 @@ await page.click('#tPhotos'); await page.waitForSelector('#sPhotos:not([hidden])
 await page.waitForFunction(()=>!document.querySelector('#pRender').disabled, null, {timeout:15000}).catch(()=>{});
 ok('render button ready', !(await page.$eval('#pRender', b=>b.disabled)), await page.textContent('#photoBody'));
 ok('daily count shown', /5 left today/.test(await page.textContent('#photoBody')), await page.textContent('#photoBody'));
+// featured photos ship with the site (photos/index.json): everyone sees them, they compare and go to their view, and cannot be deleted
+await page.waitForSelector('.pcard.feat', {timeout:10000}).catch(()=>{});
+const feat=JSON.parse(await E(`JSON.stringify(PL.featured.map(p=>({id:p.id, room:p.where.room, model:p.model, mode:p.view&&p.view.mode})))`));
+ok('featured photo listed', feat.length>=1 && feat[0].room && feat[0].model && feat[0].mode, feat);
+ok('featured card shown', (await page.$$('.pcard.feat')).length===feat.length && /Featured/.test(await page.textContent('#photoBody')), await page.textContent('#photoBody'));
+await page.click('.pcard.feat'); await page.waitForSelector('#pview:not([hidden])');
+await page.waitForFunction(()=>document.querySelector('#pvA').naturalWidth>0 && document.querySelector('#pvB').naturalWidth>0, null, {timeout:10000}).catch(()=>{});
+ok('featured viewer loads both pictures', await page.$eval('#pvA', i=>i.naturalWidth>0) && await page.$eval('#pvB', i=>i.naturalWidth>0) && await page.isVisible('#pvCmpL'));
+ok('featured cannot be deleted', await page.isHidden('#pvDel') && await page.isVisible('#pvDl') && /made with/.test(await page.textContent('#pvM')), await page.textContent('#pvM'));
+await page.screenshot({path:`P-photos-${TAG}-featured.png`});
+await page.click('#pvX');
 await page.click('#pRender');
-await page.waitForFunction(()=>document.querySelector('.pcard:not(.pending)'), null, {timeout:240000}).catch(()=>{});
+await page.waitForFunction(()=>document.querySelector('.pcard:not(.pending):not(.feat)'), null, {timeout:240000}).catch(()=>{});
 ok('posted view images', api.posts.length===1 && !api.bad.length && api.posts[0].sizes.every(n=>n>1000), {posts:api.posts, bad:api.bad});
 ok('post size under limit', api.posts.length && api.posts[0].sizes.reduce((a,b)=>a+b,0)<4.2e6, api.posts[0]&&api.posts[0].sizes);
 ok('scene described', api.posts.length && /great room/i.test(api.posts[0].scene) && /main level/.test(api.posts[0].scene), api.posts[0]&&api.posts[0].scene);
 ok('aspect follows the screen', api.posts.length && (TAG==='phone'?['9:16','2:3']:['16:9','3:2']).includes(api.posts[0].aspect), api.posts[0]&&api.posts[0].aspect);
-ok('photo card done', await page.$('.pcard:not(.pending)')!==null, await page.innerHTML('#photoBody'));
+ok('photo card done', await page.$('.pcard:not(.pending):not(.feat)')!==null, await page.innerHTML('#photoBody'));
 await page.screenshot({path:`P-photos-${TAG}-sheet.png`});
 const rec=JSON.parse(await E(`JSON.stringify(PL.list.map(p=>({status:p.status, hasPhoto:p.photo instanceof Blob, hasRender:p.render instanceof Blob, match:p.match, room:p.where&&p.where.room, items:p.items.length})))`));
 const lum=await E(`(async()=>{ const p=PL.list[0], im=await imgOf(p.render), c=document.createElement('canvas'); c.width=64; c.height=36; const g=c.getContext('2d'); g.drawImage(im,0,0,64,36); const d=g.getImageData(0,0,64,36).data; let s=0; for(let i=0;i<d.length;i+=4) s+=d[i]+d[i+1]+d[i+2]; return s/(d.length/4)/3; })()`);
 ok('3D picture is not black', lum>25, lum);
 ok('record saved with photo and 3D picture', rec.length===1 && rec[0].status==='done' && rec[0].hasPhoto && rec[0].hasRender && rec[0].items>0, rec);
 // viewer: compare, go to the view
-await page.click('.pcard'); await page.waitForSelector('#pview:not([hidden])');
+await page.click('.pcard:not(.feat)'); await page.waitForSelector('#pview:not([hidden])');
 ok('viewer shows both', await page.isVisible('#pvB') && await page.isVisible('#pvCmpL') && await page.isVisible('#pvDl'));
 await page.$eval('#pvCmp', el=>{ el.value=30; el.dispatchEvent(new Event('input')); });
 ok('compare clips photo', /inset\(0px 0px 0px 70%\)|inset\(0 0 0 70%\)/.test(await page.$eval('#pvB', el=>el.style.clipPath)), await page.$eval('#pvB', el=>el.style.clipPath));
@@ -69,11 +80,11 @@ const back=JSON.parse(await E(`JSON.stringify({mode, focus:FOCUS, x:+(WG.x+HO[0]
 ok('go to this view', back.mode==='walk' && back.focus==='main' && Math.abs(back.x-37)<.2 && Math.abs(back.z-64.5)<.2 && back.viewer, back);
 // survives a reload
 await page.reload({waitUntil:'domcontentloaded', timeout:120000}); await page.waitForFunction(()=>window.__t, null, {timeout:120000}); await page.waitForTimeout(800);
-await page.click('#tPhotos'); await page.waitForSelector('.pcard', {timeout:10000}).catch(()=>{});
-ok('kept after reload', (await page.$$('.pcard')).length===1);
+await page.click('#tPhotos'); await page.waitForSelector('.pcard:not(.feat)', {timeout:10000}).catch(()=>{});
+ok('kept after reload', (await page.$$('.pcard:not(.feat)')).length===1);
 // delete takes two taps
-await page.click('.pcard'); await page.click('#pvDel'); ok('delete arms first', await page.isVisible('#pview') && /again/.test(await page.textContent('#pvDel')));
-await page.click('#pvDel'); await page.waitForTimeout(300); ok('deleted', (await page.$$('.pcard')).length===0 && await page.isHidden('#pview'));
+await page.click('.pcard:not(.feat)'); await page.click('#pvDel'); ok('delete arms first', await page.isVisible('#pview') && /again/.test(await page.textContent('#pvDel')));
+await page.click('#pvDel'); await page.waitForTimeout(300); ok('deleted', (await page.$$('.pcard:not(.feat)')).length===0 && await page.isHidden('#pview'));
 // plan view can't render
 await E(`setMode('plan'); renderPhotos(); 1`); ok('plan view explains', await page.$eval('#pRender', b=>b.disabled) && /Switch to 3D or Walk/.test(await page.textContent('#photoBody')));
 console.log(JSON.stringify(res,null,1)); console.log(errs.slice(0,10).join('\n')||'no errors'); console.log(fails?`${fails} FAILED`:'ALL OK');
