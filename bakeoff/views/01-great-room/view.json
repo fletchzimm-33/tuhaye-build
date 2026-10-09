@@ -1,0 +1,126 @@
+{
+ "name": "01-great-room",
+ "camera": {
+  "name": "01-great-room",
+  "focus": "main",
+  "walk": [
+   37,
+   64.5,
+   22,
+   50,
+   -0.12
+  ]
+ },
+ "w": 1536,
+ "h": 864,
+ "ar": "16:9",
+ "items": [
+  {
+   "id": 59,
+   "type": "rug",
+   "name": "Area rug",
+   "desc": "oatmeal area rug",
+   "color": "#5bd411",
+   "share": 0.09
+  },
+  {
+   "id": 157,
+   "type": "accent",
+   "name": "Velvet accent chair",
+   "desc": "rust upholstered velvet accent chair",
+   "color": "#f05e42",
+   "share": 0.0323
+  },
+  {
+   "id": 57,
+   "type": "sofa",
+   "name": "Sofa",
+   "desc": "oatmeal upholstered sofa",
+   "color": "#4251f0",
+   "share": 0.0318
+  },
+  {
+   "id": 60,
+   "type": "coffee",
+   "name": "Coffee table",
+   "desc": "white oak coffee table",
+   "color": "#f042b6",
+   "share": 0.0156
+  },
+  {
+   "id": 155,
+   "type": "sofav",
+   "name": "Curved velvet sofa",
+   "desc": "ivory upholstered curved velvet sofa",
+   "color": "#c342f0",
+   "share": 0.0146
+  },
+  {
+   "id": 164,
+   "type": "art",
+   "name": "Framed art",
+   "desc": "black framed art",
+   "color": "#11d428",
+   "share": 0.0129
+  },
+  {
+   "id": 156,
+   "type": "accent",
+   "name": "Velvet accent chair",
+   "desc": "rust upholstered velvet accent chair",
+   "color": "#11d469",
+   "share": 0.0119
+  },
+  {
+   "id": 159,
+   "type": "tlamp",
+   "name": "Table lamp",
+   "desc": "white table lamp",
+   "color": "#8cf042",
+   "share": 0.0048
+  },
+  {
+   "id": 158,
+   "type": "side",
+   "name": "Side table",
+   "desc": "walnut side table",
+   "color": "#112bd4",
+   "share": 0.0043
+  }
+ ],
+ "where": {
+  "room": "Great Room",
+  "level": "main level",
+  "floor": "wood"
+ },
+ "light": "Midday",
+ "hits": 0.8903778452932098,
+ "view": {
+  "mode": "walk",
+  "focus": "main",
+  "orbit": {
+   "theta": -0.8,
+   "phi": 1.02,
+   "r": 109.7517739534378,
+   "tx": -30.713603777982456,
+   "ty": 13,
+   "tz": -41.61525751032455
+  },
+  "walk": {
+   "x": -2,
+   "z": -52.08,
+   "y": 16.833333333333332,
+   "yaw": 0.8023456932038533,
+   "pitch": -0.12
+  },
+  "plan": {
+   "cx": 0,
+   "cz": 0,
+   "vh": 40
+  },
+  "feet": 11.5,
+  "seated": false,
+  "eye": null,
+  "light": "bright"
+ }
+}

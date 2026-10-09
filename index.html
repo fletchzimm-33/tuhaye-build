@@ -2407,9 +2407,9 @@ function capBeauty(cam,W,H,passes){ const out=new THREE.WebGLRenderTarget(W,H,{d
 /* a colour name for a piece: its own swatch name when it has one, else the nearest swatch anywhere */
 function capColorName(it){ const pal=palOf(it), hit=pal.find(p=>p[1].toLowerCase()===String(it.color||'').toLowerCase()); if(hit) return hit[0];
   if(!it.color) return ''; const a=new THREE.Color(it.color); let best='', bd=9; for(const k in PAL) for(const [n,h] of PAL[k]){ const b=new THREE.Color(h), d=(a.r-b.r)**2+(a.g-b.g)**2+(a.b-b.b)**2; if(d<bd){ bd=d; best=n; } } return best; }
-function capDesc(it){ const k=kindOf(it), c=capColorName(it).toLowerCase(), n=itemName(it).toLowerCase(); return (c?c+' ':'')+(k==='fabric'?'upholstered ':k==='leather'?'leather ':k==='felt'?'felt ':'')+n; }
+function capDesc(it){ const k=kindOf(it), c=capColorName(it).toLowerCase().replace(/ paint$/,''), n=itemName(it).toLowerCase(); return (c?c+' ':'')+(k==='fabric'?'upholstered ':k==='leather'?'leather ':k==='felt'?'felt ':'')+n; }
 function capWhere(){ if(ENVK==='theater') return {room:'Theater', level:'lower level'};
-  if(mode==='walk'){ const M=(wk.feet||0)>=YM-1, r=roomAt(M?HL.M:HL.L, walk.x, walk.z); return {room:r?r.n:(FOCUS==='house'?'Outside':''), level:M?'main level':'lower level', floor:r&&r.f||''}; }
+  if(mode==='walk'){ const M=(wk.feet||0)>=YM-1, L=M?HL.M:HL.L, fx=-Math.sin(walk.yaw), fz=-Math.cos(walk.yaw); let r=null; for(const d of [0,1.5,3]){ r=roomAt(L, walk.x+fx*d, walk.z+fz*d); if(r) break; } return {room:r?r.n:(FOCUS==='house'?'Outside':''), level:M?'main level':'lower level', floor:r&&r.f||''}; }
   return {room:'', level:FOCUS==='house'?'exterior':FOCUS==='main'?'main level':FOCUS==='lower'?'lower level':''}; }
 /* the whole capture: { w, h, ar, beauty (JPEG), depth, lines, ids (PNG data URLs), items in view, where, light, view (to come back to it) } */
 function captureView(opt){ opt=opt||{}; const {w:W,h:H,ar}=capSize(opt.long||1536), cam=capCam(W,H), N=W*H;
@@ -2806,12 +2806,14 @@ function layoutSig(){ const s=JSON.stringify(items().map(i=>[i.type,+i.x.toFixed
 function capScene(c){ const w=c.where, v=c.view, house=ENVK==='house';
   const place=!house?'a home theater with a large screen, theater seating and dark acoustic walls'
     : v.mode==='orbit'?(v.focus==='house'?'the exterior of a mountain-modern house with stacked stone, cedar siding and dark standing-seam metal roofs on a sloping mountain site':`a cutaway view looking down into the ${w.level} of a mountain-modern house`)
-    : `the ${w.room?w.room.toLowerCase():'interior'} on the ${w.level} of a mountain-modern house, with mountain views through the windows`;
+    : `the ${w.room?w.room.toLowerCase().replace(/ \/ /g,' and '):'interior'} on the ${w.level} of a mountain-modern house, with mountain views through the windows`;
   const light=house?{Midday:'bright midday daylight',Evening:'warm low evening sun, lamps on',Dusk:'dusk, deep blue sky outside, warm interior lamps glowing'}[c.light]
     :{Bright:'bright, even lighting',Dim:'dimmed lights',Movie:'dark movie lighting lit by the glowing screen'}[c.light];
   const floor={wood:'wide-plank oak floors',tile:'large stone tile floors',concrete:'polished concrete floor'}[w.floor];
-  const big=c.items.filter(i=>i.share>=.01).slice(0,10).map(i=>i.desc);
+  const big=capCount(c.items.filter(i=>i.share>=.01).map(i=>i.desc)).slice(0,10);
   return [place, light, floor, big.length?'furnished with '+big.join(', '):''].filter(Boolean).join('; '); }
+function capCount(list){ const n=new Map(); list.forEach(d=>n.set(d,(n.get(d)||0)+1)); const W=['','','two','three','four','five','six'];
+  return [...n].map(([d,k])=>k<2?d:`${W[k]||'several'} ${d.replace(/(s|x|ch|sh)$/,'$1e')}s`); }
 /* how well the photo lines up with the scene: the share of the 3D outline that has an edge in the photo within a couple of pixels */
 async function photoMatch(photo, lines){ const [a,b]=await Promise.all([imgOf(photo), imgOf(lines)]); const W=384, H=Math.round(W*b.height/b.width);
   const gray=im=>{ const c=document.createElement('canvas'); c.width=W; c.height=H; const g=c.getContext('2d',{willReadFrequently:true}); g.drawImage(im,0,0,W,H); const d=g.getImageData(0,0,W,H).data, o=new Float32Array(W*H); for(let i=0;i<W*H;i++) o[i]=.299*d[i*4]+.587*d[i*4+1]+.114*d[i*4+2]; return o; };
