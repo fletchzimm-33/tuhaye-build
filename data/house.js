@@ -322,6 +322,10 @@ function buildStairs(pick){ (HOUSE.rails||[]).forEach(([X0,Z0,X1,Z1,y0,y1])=>{ c
     const box=(p0,p1,y0,y1,m)=>{ const lo=Math.min(p0,p1), hi=Math.max(p0,p1); ax?hbox(B,m,lo,y0,b0,hi,y1,b1):hbox(B,m,b0,y0,lo,b1,y1,hi); };
     for(let i=0;i<n-1;i++){ const p0=a0+i*d, p1=p0+d, y=s.y0+(i+1)*rise; if(open) box(p0,p1+Math.sign(d)*.08,y-.15,y,{px:HM.wood,nx:HM.wood,pz:HM.wood,nz:HM.wood,py:HM.wood,ny:HM.wood});
       else box(p0,p1,Math.min(s.y0,s.y1)-(s.ext?.5:0),y,s.ext?(s.n==='spa'?HM.pavers:{px:HM.stone,nx:HM.stone,pz:HM.stone,nz:HM.stone,py:HM.pavers,ny:null}):{px:HM.paint,nx:HM.paint,pz:HM.paint,nz:HM.paint,py:HM.wood,ny:null}); }
+    if(s.ext&&s.n!=='spa'){ const P=(a,y,b)=>ax?[a,y,b]:[b,y,a], t=.55, nos=a=>s.y0+(s.y1-s.y0)*(a-a0)/(a1-a0)+.45, K=Math.max(2,Math.ceil(Math.abs(a1-a0))); // stone cheek walls along both sides: just above the nosings, and never below the lawn beside them
+      [[b0-t,b0,-1],[b1,b1+t,1]].forEach(([c0,c1,sg])=>{ const bo=sg<0?c0-.4:c1+.4, gr=a=>ax?grade(a,bo):grade(bo,a), A=[...Array(K+1)].map((_,k)=>a0+(a1-a0)*k/K), T=A.map(a=>Math.max(nos(a),gr(a)+.2)), g=Math.min(...A.map(gr))-1, nB=ax?[0,0,1]:[1,0,0], sd=Math.sign(a1-a0);
+        for(let k=0;k<K;k++){ const p=A[k], q=A[k+1]; quadF(B,HM.stone,P(p,g,c0),P(q,g,c0),P(q,T[k+1],c0),P(p,T[k],c0),[-nB[0],0,-nB[2]]); quadF(B,HM.stone,P(p,g,c1),P(q,g,c1),P(q,T[k+1],c1),P(p,T[k],c1),nB); quadF(B,HM.fascia,P(p,T[k],c0),P(q,T[k+1],c0),P(q,T[k+1],c1),P(p,T[k],c1),[0,1,0]); }
+        quadF(B,HM.stone,P(a0,g,c0),P(a0,g,c1),P(a0,T[0],c1),P(a0,T[0],c0),ax?[-sd,0,0]:[0,0,-sd]); quadF(B,HM.stone,P(a1,g,c0),P(a1,g,c1),P(a1,T[K],c1),P(a1,T[K],c0),ax?[sd,0,0]:[0,0,sd]); }); }
     if(!open&&s.y1>s.y0){ const yT=s.y0+(n-1)*rise; if(s.y1-yT>.01){ const sg=Math.sign(d), m=s.ext?(s.n==='spa'?HM.pavers:HM.stone):HM.paint, P=(a,y,b)=>ax?[a,y,b]:[b,y,a]; // the riser up to the floor at the top
         quadF(B,m,P(a1,yT,b0),P(a1,yT,b1),P(a1,s.y1,b1),P(a1,s.y1,b0),ax?[-sg,0,0]:[0,0,-sg]); } }
     if(open){ const lo=Math.min(s.y0,s.y1); [b0+.02,b1-.12].forEach(bb=>{ const yA=s.y0-.9, yB=s.y1-.9; const P=(a,y,b)=>ax?[a,y,b]:[b,y,a];

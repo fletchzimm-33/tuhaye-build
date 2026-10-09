@@ -96,6 +96,20 @@ def _profile(pts, step=2.5):
         n=max(1,round(((x1-x0)**2+(z1-z0)**2)**.5/step))
         out+=[(round(x0+(x1-x0)*k/n,2),round(z0+(z1-z0)*k/n,2),round(y0+(y1-y0)*k/n,2)) for k in range(n)]
     return out+[pts[-1]]
+# auto court (asphalt) in front of the garage, and the drive that leaves it to the north (sheet A2.1)
+DRIVE=[(57.0,90.6),(57.0,57.6),(61.0,56.4),(68.0,53.6),(74.0,49.0),(78.0,41.0),(77.6,25.0),(73.0,0.0),(70.5,-40.0),(89.0,-40.0),(91.5,0.0),(96.0,25.0),(97.2,40.0),(95.6,50.0),(96.6,56.8),(102.6,80.7),(103.4,88.6),(91.6,88.6),(91.6,90.6)]
+def _court():
+    """a grid of spot heights over the auto court (sheet A2.1): 14.42 where the entry steps arrive, falling gently to 13.85 at the garage apron"""
+    poly=DRIVE; out=[]
+    def inside(x,z):
+        c=False
+        for (x0,z0),(x1,z1) in zip(poly,poly[1:]+poly[:1]):
+            if (z0>z)!=(z1>z) and x<x0+(z-z0)*(x1-x0)/(z1-z0): c=not c
+        return c
+    for z in range(58,91,4):
+        for x in range(58,104,5):
+            if inside(x,z): out.append((x,z,round(14.42-(z-58)/(89-58)*.57,2)))
+    return out
 TERRAIN=[
  # far field: the lot falls from the east (the drive, ~6790') to the west (~6758')
  (-40,-40,-8),(-40,20,-8),(-40,70,-8.2),(-40,120,-8.5),(-40,170,-8.5),(-25,50,-6.8),(-25,110,-7.6),
@@ -107,16 +121,18 @@ TERRAIN=[
  # east face of the primary wing (A3.1 obscured east elevation) and north of the sitting terrace (A3.2)
  *_profile([(37.5,2,5.9),(37.5,10,6.6),(37.5,19,7.5),(42.5,26,9.0),(43,31,9.4),(48,31,9.3),(55,29,11.0)]),(52,6,10.8),
  (58,20,13.4),(62,40,14.2),(64,58,14.4),(66,60,13.8),(82,40,14.2),(84,10,14.8),(80,-20,15.5),(110,40,17.5),(108,70,17.5),
- # auto court and the east face (A3.1 east elevation)
- (62,82,13.6),(80,80,13.7),(100,84,13.8),(106,92,17.8),(106,104,19.6),(106,116,21.5),(112,96,19.5),(112,112,22.5),(118,124,23.5),
+ # auto court: graded flat, from the entry steps (14.42) down to the garage apron, just under the 6780'-6" slab
+ *_court(), (94,90.5,13.9),(98,90.5,13.9),(102,90.5,13.9),(94,92.5,13.92),(98,92.5,13.92),(102,92.5,13.92),
+ # the ground held up behind the angled stone retaining wall (its top steps 15.0 -> 18.0), and east of the garage (A3.1 east elevation)
+ *_profile([(99.4,56.0,15.0),(105.4,80.3,18.0)], 3), *_profile([(106.5,58,15.6),(109,80,18.3)], 4),
+ *_profile([(106.2,86,17.0),(106.2,92,17.4),(106.2,100,18.8),(106.2,108,20.1),(106.2,116,21.5),(106.2,122,22.1)], 3),
+ (115,60,16.8),(115,75,18.3),(115,90,19.4),(115,105,21.4),(115,120,23.0),(126,50,17.5),(126,80,19.5),(126,110,22.5),(126,130,23.5),
  # south face (A3.3): from ~6 ft below the lower floor at the southwest corner up to the auto-court level at the garage
  *_profile([(-1,120,-6.6),(9,120,-5.6),(15,120,-4.0),(20,120,-2.6),(25,120,-1.3),(30,120,0.0),(37.3,120,2.0),(45,120,4.3),(57,120,7.6),(64,120,9.5),(70,120,11.8),(78,120,14.8),(85,120,16.9),(92,121,18.4),(100,121,19.6)]),
  *_profile([(-1,129,-6.4),(25,129,-1.0),(60,130,8.5),(92,130,19.0)], 6),
  (14,31,-0.7),(20,31,-0.6),(23,38,-0.6),(16,39,-0.7),(20,45,-0.6),(8,38,-1.2),   # the landscaped strip west of the office, level with the terraces (A3.2 west elevation)
  (150,40,19),(150,100,24),(150,160,18),(60,170,4),(0,170,-5),(140,-40,16),(60,-40,10),(10,-40,-5),
 ]
-# auto court (asphalt) in front of the garage, and the drive that leaves it to the north (sheet A2.1)
-DRIVE=[(57.0,90.6),(57.0,57.6),(61.0,56.4),(68.0,53.6),(74.0,49.0),(78.0,41.0),(77.6,25.0),(73.0,0.0),(70.5,-40.0),(89.0,-40.0),(91.5,0.0),(96.0,25.0),(97.2,40.0),(95.6,50.0),(96.6,56.8),(102.6,80.7),(103.4,88.6),(91.6,88.6),(91.6,90.6)]
 # angled stone retaining wall along the east side of the auto court: (X0,Z0,X1,Z1, thickness, top y at start, top y at end)
 RWALLS=[(97.2,56.6,103.2,80.9,1.5,81.5-66.5,84.5-66.5)]
 
