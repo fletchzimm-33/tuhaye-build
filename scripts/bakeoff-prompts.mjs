@@ -10,7 +10,7 @@ const { INSTRUCT }=createRequire(import.meta.url)(path.join(ROOT,'api','render.j
 function capScene(c){ const w=c.where, v=c.view, house=v.focus!=='theater';
   const place=!house?'a home theater with a large screen, theater seating and dark acoustic walls'
     : v.mode==='orbit'?(v.focus==='house'?'the exterior of a mountain-modern house with stacked stone, cedar siding and dark standing-seam metal roofs on a sloping mountain site':`a cutaway view looking down into the ${w.level} of a mountain-modern house`)
-    : `the ${w.room?w.room.toLowerCase().replace(/ \/ /g,' and '):'interior'} on the ${w.level} of a mountain-modern house, with mountain views through the windows`;
+    : `the ${w.room?w.room.toLowerCase().replace(/ \/ /g,' and ').replace(/ #\d+$/,''):'interior'} on the ${w.level} of a mountain-modern house, with mountain views through the windows`;
   const light=house?{Midday:'bright midday daylight',Evening:'warm low evening sun, lamps on',Dusk:'dusk, deep blue sky outside, warm interior lamps glowing'}[c.light]
     :{Bright:'bright, even lighting',Dim:'dimmed lights',Movie:'dark movie lighting lit by the glowing screen'}[c.light];
   const floor={wood:'wide-plank oak floors',tile:'large stone tile floors',concrete:'polished concrete floor'}[w.floor];
