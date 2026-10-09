@@ -16,6 +16,9 @@ node graphics-modes.mjs light   # and: dark
 node house.mjs                  # the whole house: stairs, walls, doorways, furniture on both levels
 node edit-lock.mjs              # furniture stays put until Edit furniture is on
 node screenshots.mjs look       # renders views to out/
+node photos.mjs                 # Render this view and the Photos library, against a stand-in image service (add 393 for phone size)
+node render-api.mjs             # api/render.js with fal.ai and the limits store stood in (no browser)
+node bakeoff-views.mjs final    # exports the bake-off views and their guide images to ../bakeoff/views/
 ```
 
 Each prints what it checked and ends with `no errors` when the page logged no errors. Set `PLAYWRIGHT` to a Playwright
