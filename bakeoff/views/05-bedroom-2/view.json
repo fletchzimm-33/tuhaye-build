@@ -1,0 +1,102 @@
+{
+ "name": "05-bedroom-2",
+ "camera": {
+  "name": "05-bedroom-2",
+  "focus": "main",
+  "walk": [
+   26,
+   103,
+   18,
+   116,
+   -0.14
+  ]
+ },
+ "w": 1536,
+ "h": 864,
+ "ar": "16:9",
+ "items": [
+  {
+   "id": 91,
+   "type": "bed",
+   "name": "King bed",
+   "desc": "sage paint upholstered king bed",
+   "color": "#11d418",
+   "share": 0.1375
+  },
+  {
+   "id": 184,
+   "type": "art",
+   "name": "Framed art",
+   "desc": "walnut framed art",
+   "color": "#4811d4",
+   "share": 0.0223
+  },
+  {
+   "id": 93,
+   "type": "nightstand",
+   "name": "Nightstand",
+   "desc": "walnut nightstand",
+   "color": "#117cd4",
+   "share": 0.0177
+  },
+  {
+   "id": 185,
+   "type": "pouf",
+   "name": "Pouf",
+   "desc": "oatmeal upholstered pouf",
+   "color": "#44f042",
+   "share": 0.0093
+  },
+  {
+   "id": 95,
+   "type": "accent",
+   "name": "Velvet accent chair",
+   "desc": "navy upholstered velvet accent chair",
+   "color": "#bb11d4",
+   "share": 0.0089
+  },
+  {
+   "id": 183,
+   "type": "tlamp",
+   "name": "Table lamp",
+   "desc": "sand table lamp",
+   "color": "#f0a542",
+   "share": 0.0073
+  }
+ ],
+ "where": {
+  "room": "Bedroom #2",
+  "level": "main level",
+  "floor": "wood"
+ },
+ "light": "Midday",
+ "hits": 0.9334324966242284,
+ "view": {
+  "mode": "walk",
+  "focus": "main",
+  "orbit": {
+   "theta": -0.8,
+   "phi": 1.02,
+   "r": 109.7517739534378,
+   "tx": -30.713603777982456,
+   "ty": 13,
+   "tz": -41.61525751032455
+  },
+  "walk": {
+   "x": -13,
+   "z": -13.579999999999998,
+   "y": 16.833333333333332,
+   "yaw": 2.5899376710612465,
+   "pitch": -0.14
+  },
+  "plan": {
+   "cx": 0,
+   "cz": 0,
+   "vh": 40
+  },
+  "feet": 11.5,
+  "seated": false,
+  "eye": null,
+  "light": "bright"
+ }
+}

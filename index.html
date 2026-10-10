@@ -101,7 +101,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stro
 .savebar button{background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:7px 15px;font-weight:600;font-size:12.5px}
 
 /* tool dock */
-.dock{position:absolute;left:16px;right:16px;bottom:12px;max-width:540px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:2px;background:var(--panel-a);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:18px;padding:5px;box-shadow:var(--shadow);z-index:6;transition:opacity .12s}
+.dock{position:absolute;left:16px;right:16px;bottom:12px;max-width:540px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr);gap:2px;background:var(--panel-a);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:18px;padding:5px;box-shadow:var(--shadow);z-index:6;transition:opacity .12s}
 .dock button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:54px;padding:0 2px;border-radius:13px;font-size:11.5px;font-weight:600;letter-spacing:.01em;white-space:nowrap;color:var(--ink)}
 .dock button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .dock button:hover:not(:disabled):not(.on){background:var(--paper)}
@@ -254,6 +254,38 @@ details.more .dimbox{padding-bottom:12px;display:flex;flex-direction:column;gap:
 .xbtn:hover{background:var(--paper);color:var(--ink)}
 .xbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round}
 .btn.go{min-height:48px;font-size:14.5px;border-radius:13px}
+/* Photos: the render button, the grid of photos, and the full-screen viewer */
+.pcta{display:flex;flex-direction:column;gap:8px}
+.pcta .btn svg{width:20px;height:20px;margin-right:8px;vertical-align:-5px}
+.pgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.pcard{position:relative;display:block;padding:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--paper);text-align:left;color:var(--ink)}
+.pcard:hover{border-color:var(--muted)}
+.pcard img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--hair)}
+.pcard.pending img{opacity:.55;filter:saturate(.5)}
+.pcap{display:flex;flex-direction:column;gap:2px;padding:8px 10px 9px;min-width:0}
+.pcap b{font:600 13px/1.25 var(--f-body);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pcap i{font:400 11.5px/1.3 var(--f-body);font-style:normal;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pbadge{position:absolute;top:8px;left:8px;display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;background:var(--panel-a);color:var(--ink);font:600 11.5px/1 var(--f-body);box-shadow:var(--shadow)}
+.pbadge.bad{color:var(--redline)}
+.spin{display:inline-block;width:10px;height:10px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pview{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;gap:12px;padding:56px 16px max(16px,env(safe-area-inset-bottom));background:rgba(12,14,16,.94);color:#f1f1ec;-webkit-user-select:none;user-select:none}
+.pv-wrap{position:relative;flex:1;min-height:0}
+.pv-stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:10px;overflow:hidden;background:#000}
+.pv-stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pview.cmp .pv-stage::after{content:"";position:absolute;top:0;bottom:0;left:var(--cmp);width:2px;margin-left:-1px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.3)}
+.pv-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;max-width:1100px;width:100%;margin:0 auto}
+.pv-cap{min-width:0;display:flex;flex-direction:column;gap:3px}
+.pv-cap b{font:600 15px/1.3 var(--f-display)}
+.pv-cap span{font-size:12.5px;line-height:1.4;color:#b9bdb8}
+.pv-cmp{display:flex;align-items:center;gap:10px;font:600 11px/1 var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:#b9bdb8}
+.pv-cmp input{width:min(220px,40vw);accent-color:#f1f1ec}
+.pview .btn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#f1f1ec;text-decoration:none;display:inline-flex;align-items:center}
+.pview .btn:hover:not(:disabled){border-color:rgba(255,255,255,.5)}
+.pview .btn.danger{color:#ff8a78}
+.pview .btn.armed{background:var(--redline);border-color:var(--redline);color:#fff}
+.pv-x{position:absolute;top:10px;right:12px;color:#f1f1ec}
+.pv-x:hover{background:rgba(255,255,255,.1);color:#fff}
 
 @keyframes sheetUp{from{transform:translateY(28px);opacity:0}to{transform:none;opacity:1}}
 @media (max-width:879px){
@@ -285,15 +317,15 @@ details.more .dimbox{padding-bottom:12px;display:flex;flex-direction:column;gap:
 }
 @media (min-width:880px){
   #app:has(.sheet:not([hidden])) .lane{right:424px}
-  .dock{left:calc(50% - 104px);right:auto;width:440px;margin:0;bottom:16px}
-  .editb,#app.walking .editb{left:calc(50% - 116px);right:auto;bottom:16px;transform:translateX(-100%);height:66px;padding:0 26px;border-radius:18px}
+  .dock{left:calc(50% - 134px);right:auto;width:500px;margin:0;bottom:16px}
+  .editb,#app.walking .editb{left:calc(50% - 146px);right:auto;bottom:16px;transform:translateX(-100%);height:66px;padding:0 26px;border-radius:18px}
   .fab{right:16px;bottom:16px;width:52px;height:52px}
   .joy{bottom:104px} .walkbtns{bottom:104px}
   .sheet{left:auto;right:16px;top:16px;bottom:auto;width:396px;max-height:calc(100% - 118px);border-radius:20px;border-bottom:1px solid var(--line)}
   #sItem.compact .sh-body{display:flex}
   .btn.more{display:none}
 }
-@media (min-width:880px) and (max-width:1060px){ .dock{left:auto;right:84px;width:400px} .editb,#app.walking .editb{left:auto;right:496px;transform:none} }
+@media (min-width:880px) and (max-width:1060px){ .dock{left:auto;right:84px;width:456px} .editb,#app.walking .editb{left:auto;right:552px;transform:none} }
 /* phones turned sideways: one row of controls across the top, panels on the right */
 @media (orientation:landscape) and (max-height:520px) and (max-width:879px){
   #app{--ui-b:64px}
@@ -365,6 +397,7 @@ details.more .dimbox{padding-bottom:12px;display:flex;flex-direction:column;gap:
     <button id="tLayout"><svg viewBox="0 0 24 24"><path d="M12 3.5l8.5 4.5-8.5 4.5L3.5 8z"/><path d="M3.5 12.2l8.5 4.5 8.5-4.5"/><path d="M3.5 16.2l8.5 4.5 8.5-4.5"/></svg><span class="dotw">Layouts<i class="dot" id="dirtyDot" hidden></i></span></button>
     <button id="tRoom"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="17" rx="1.6"/><path d="M10.5 8.2l3.9-2.3a1.6 1.6 0 0 1 2.2.6l4.2 7.3"/><path d="M10.5 18.2l9.4-5.4"/><circle cx="7" cy="16.6" r=".9"/></svg>Finishes</button>
     <button id="tLights"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.4 1.1 2.2h5c0-.8.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/></svg><span id="lightTxt">Bright</span></button>
+    <button id="tPhotos"><svg viewBox="0 0 24 24"><path d="M4 8.5h3.2L8.8 6h6.4l1.6 2.5H20V19H4z"/><circle cx="12" cy="13.2" r="3.4"/></svg><span class="dotw">Photos<i class="dot" id="photoDot" hidden></i></span></button>
     <button id="tUndo" disabled><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>Undo</button>
   </nav>
 
@@ -398,6 +431,21 @@ details.more .dimbox{padding-bottom:12px;display:flex;flex-direction:column;gap:
     <button class="btn pri go" data-act="close">Start exploring</button>
     <p class="note" style="font-size:11px;opacity:.72;margin-top:12px">Scanned furniture and materials: Khronos glTF Sample Assets (Wayfair LLC and Darmstadt Graphics Group, CC BY 4.0), Poly Haven and ambientCG (CC0).</p></div>
   </section>
+
+  <section class="sheet" id="sPhotos" hidden aria-label="Photos">
+    <div class="sh-head"><div><h2>Photos</h2><p class="meta" id="photoMeta">Photographs of views you choose</p></div><button class="done" data-act="close">Done</button></div>
+    <div class="sh-body" id="photoBody"></div>
+  </section>
+
+  <div class="pview" id="pview" hidden role="dialog" aria-modal="true" aria-label="Photo">
+    <div class="pv-wrap" id="pvWrap"><div class="pv-stage" id="pvStage"><img id="pvA" alt="The 3D view"><img id="pvB" alt="The photograph"></div></div>
+    <div class="pv-bar">
+      <div class="pv-cap"><b id="pvT"></b><span id="pvM"></span></div>
+      <label class="pv-cmp" id="pvCmpL">3D<input type="range" id="pvCmp" min="0" max="100" value="100" aria-label="Compare the photo with the 3D view">Photo</label>
+      <div class="btnrow"><button class="btn" id="pvGo">Go to this view</button><button class="btn" id="pvDl">Download</button><button class="btn danger" id="pvDel">Delete</button></div>
+    </div>
+    <button class="xbtn pv-x" id="pvX" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
 
   <section class="sheet" id="sRoom" hidden aria-label="Theater finishes">
     <div class="sh-head"><div><h2>Theater finishes</h2><p class="meta" id="roomMeta"></p></div><button class="done" data-act="close">Done</button></div>
@@ -2306,6 +2354,92 @@ function photoThumb(cam, TW, TH){ const tp=makePipe(), out=new THREE.WebGLRender
     const c=document.createElement('canvas'); c.width=TW; c.height=TH; const g=c.getContext('2d'), img=g.createImageData(TW,TH); for(let y=0;y<TH;y++) img.data.set(px.subarray((TH-1-y)*TW*4,(TH-y)*TW*4), y*TW*4);
     g.putImageData(img,0,0); return c.toDataURL('image/jpeg',.72); }
   finally{ tp.dispose(); out.dispose(); renderer.setRenderTarget(null); } }
+/* ---------- view capture for "Render this view": the picture at a standard aspect, plus guide images an image model can follow.
+   Depth and the outline drawing come straight from the geometry, so walls, windows and every piece of furniture are exactly where they are;
+   the object mask (one flat colour per piece, grey tones for walls, floors and ceilings) lets a returned photo be checked against the scene. ---------- */
+const CAP_AR=[[21,9],[16,9],[3,2],[4,3],[1,1],[3,4],[2,3],[9,16]];
+function capSize(long){ const a=(stage.clientWidth||1)/(stage.clientHeight||1); let b=CAP_AR[1]; for(const r of CAP_AR) if(Math.abs(Math.log(r[0]/r[1]/a))<Math.abs(Math.log(b[0]/b[1]/a))) b=r;
+  const k=long/Math.max(b[0],b[1]); return {w:Math.round(b[0]*k/8)*8, h:Math.round(b[1]*k/8)*8, ar:b.join(':')}; }
+function capCam(W,H){ applyCamera(); const c=camera.clone(); if(c.isPerspectiveCamera) c.aspect=W/H; else { const hh=(c.top-c.bottom)/2; c.left=-hh*W/H; c.right=hh*W/H; } c.updateProjectionMatrix(); c.updateMatrixWorld(); return c; }
+const CAP_VS=`varying vec3 vN, vWN; varying float vZ;
+void main(){ vec4 p=vec4(position,1.); vec3 n=normal;
+  #ifdef USE_INSTANCING
+  p=instanceMatrix*p; n=mat3(instanceMatrix)*n;
+  #endif
+  vec4 mv=modelViewMatrix*p; vZ=-mv.z; vN=normalMatrix*n; vWN=mat3(modelMatrix)*n; gl_Position=projectionMatrix*mv; }`;
+const CAP_FS={
+  depth:`uniform float zMax; varying vec3 vN, vWN; varying float vZ;
+    void main(){ float d=floor(clamp(vZ/zMax,0.,1.)*16777215.), r=floor(d/65536.); d-=r*65536.; float g=floor(d/256.); gl_FragColor=vec4(r,g,d-g*256.,255.)/255.; }`,
+  normal:`varying vec3 vN, vWN; varying float vZ; void main(){ vec3 n=normalize(vN); if(!gl_FrontFacing) n=-n; gl_FragColor=vec4(n*.5+.5,1.); }`,
+  shell:`varying vec3 vN, vWN; varying float vZ; void main(){ vec3 n=normalize(vWN); if(!gl_FrontFacing) n=-n; gl_FragColor=vec4(n.y>.7?vec3(80.,50.,50.):n.y<-.7?vec3(120.,120.,80.):vec3(120.),255.)/255.; }`,
+  item:`uniform vec3 c; varying vec3 vN, vWN; varying float vZ; void main(){ gl_FragColor=vec4(c,1.); }`,
+};
+const CAP={ mats:new Map(), none:new THREE.MeshBasicMaterial({visible:false}), zMax:1000 };
+function capMat(kind, side, rgb){ const key=kind+side+(rgb||''); let m=CAP.mats.get(key); if(m) return m;
+  const u=kind==='depth'?{zMax:{value:CAP.zMax}}:kind==='item'?{c:{value:new THREE.Color(rgb[0]/255,rgb[1]/255,rgb[2]/255)}}:{};
+  m=new THREE.ShaderMaterial({vertexShader:CAP_VS, fragmentShader:CAP_FS[kind], uniforms:u, side, toneMapped:false}); CAP.mats.set(key,m); return m; }
+/* glass, the soft shadow blobs under furniture, glows and the sky are left out, so windows show what is behind them */
+const capSkip=(o,m)=>o===sky || !m || !m.visible || m.colorWrite===false || m.blending===THREE.AdditiveBlending || (m.transparent&&(m.opacity<.9||m.depthWrite===false));
+function capSwap(pick){ const back=[];
+  scene.traverse(o=>{ if(o.isMesh){ const m=o.material, arr=Array.isArray(m), r=arr?m.map(x=>capSkip(o,x)?null:pick(o,x)):(capSkip(o,m)?null:pick(o,m));
+      if(!r||(arr&&r.every(x=>!x))){ if(o.visible){ back.push([o,null]); o.visible=false; } return; }
+      back.push([o,m]); o.material=arr?r.map(x=>x||CAP.none):r; }
+    else if((o.isLine||o.isPoints||o.isSprite)&&o.visible){ back.push([o,null]); o.visible=false; } });
+  return ()=>{ for(let i=back.length-1;i>=0;i--){ const [o,m]=back[i]; if(m) o.material=m; else o.visible=true; } }; }
+const _cc=new THREE.Color();
+function capPass(cam, rt, pick){ const restore=capSwap(pick), mask=cam.layers.mask, bg=scene.background, fog=scene.fog, su=renderer.shadowMap.needsUpdate, ca=renderer.getClearAlpha(); renderer.getClearColor(_cc);
+  try{ cam.layers.set(0); scene.background=null; scene.fog=null; renderer.shadowMap.needsUpdate=false; renderer.setRenderTarget(rt); renderer.setClearColor(0x000000,0); renderer.clear(); renderer.render(scene,cam);
+    const px=new Uint8Array(rt.width*rt.height*4); renderer.readRenderTargetPixels(rt,0,0,rt.width,rt.height,px); return px; }
+  finally{ restore(); cam.layers.mask=mask; scene.background=bg; scene.fog=fog; renderer.shadowMap.needsUpdate=su; renderer.setClearColor(_cc,ca); renderer.setRenderTarget(null); } }
+/* distinct, saturated colours for the pieces (never grey, so they can't be mistaken for the room) */
+function capColor(i){ const c=new THREE.Color().setHSL((i*.618034)%1, .85, i%2?.45:.6); return [Math.round(c.r*255),Math.round(c.g*255),Math.round(c.b*255)]; }
+function capPng(W,H,fill,type,q){ const c=document.createElement('canvas'); c.width=W; c.height=H; const g=c.getContext('2d'), img=g.createImageData(W,H); fill(img.data); g.putImageData(img,0,0); return c.toDataURL(type||'image/png',q); }
+/* rows come back bottom-up from WebGL */
+const capFlip=(px,W,H)=>{ const o=new Uint8Array(px.length), row=W*4; for(let y=0;y<H;y++) o.set(px.subarray((H-1-y)*row,(H-y)*row), y*row); return o; };
+function capBeauty(cam,W,H,passes){ const out=new THREE.WebGLRenderTarget(W,H,{depthBuffer:!PHOTO_OK||!!PH.broken, stencilBuffer:false});
+  try{
+    if(PHOTO_OK&&!PH.broken){ let tp=makePipe(); tp.setSize(W,H); if(!pipeOk(tp)){ tp.dispose(); tp=makePipe(false); tp.setSize(W,H); }
+      const opt={soft:ENVK==='house'?2.2:LIGHTS[S.light].soft, vig:0, exposure:ENVK==='house'?dayOf().exp*(mode==='walk'?.95:1):(mode==='walk'?1.12:1.22)};
+      try{ for(let k=0;k<passes;k++) photoSample(tp, cam, k, opt); sunHome(); photoShow(tp, out); } finally{ tp.dispose(); } }
+    else { out.texture.encoding=THREE.sRGBEncoding; const mask=cam.layers.mask; cam.layers.set(0); renderer.setRenderTarget(out); renderer.render(scene,cam); cam.layers.mask=mask; }
+    const px=new Uint8Array(W*H*4); renderer.readRenderTargetPixels(out,0,0,W,H,px); return capFlip(px,W,H); }
+  finally{ out.dispose(); renderer.setRenderTarget(null); } }
+/* a colour name for a piece: its own swatch name when it has one, else the nearest swatch anywhere */
+function capColorName(it){ const pal=palOf(it), hit=pal.find(p=>p[1].toLowerCase()===String(it.color||'').toLowerCase()); if(hit) return hit[0];
+  if(!it.color) return ''; const a=new THREE.Color(it.color); let best='', bd=9; for(const k in PAL) for(const [n,h] of PAL[k]){ const b=new THREE.Color(h), d=(a.r-b.r)**2+(a.g-b.g)**2+(a.b-b.b)**2; if(d<bd){ bd=d; best=n; } } return best; }
+function capDesc(it){ const k=kindOf(it), c=capColorName(it).toLowerCase().replace(/ paint$/,''), n=itemName(it).toLowerCase(); return (c?c+' ':'')+(k==='fabric'?'upholstered ':k==='leather'?'leather ':k==='felt'?'felt ':'')+n; }
+function capWhere(){ if(ENVK==='theater') return {room:'Theater', level:'lower level'};
+  if(mode==='walk'){ const M=(wk.feet||0)>=YM-1, L=M?HL.M:HL.L, fx=-Math.sin(walk.yaw), fz=-Math.cos(walk.yaw); let r=null; for(const d of [0,1.5,3]){ r=roomAt(L, walk.x+fx*d, walk.z+fz*d); if(r) break; } return {room:r?r.n:(FOCUS==='house'?'Outside':''), level:M?'main level':'lower level', floor:r&&r.f||''}; }
+  return {room:'', level:FOCUS==='house'?'exterior':FOCUS==='main'?'main level':FOCUS==='lower'?'lower level':''}; }
+/* the whole capture: { w, h, ar, beauty (JPEG), depth, lines, ids (PNG data URLs), items in view, where, light, view (to come back to it) } */
+function captureView(opt){ opt=opt||{}; const {w:W,h:H,ar}=capSize(opt.long||1536), cam=capCam(W,H), N=W*H;
+  const rt=new THREE.WebGLRenderTarget(W,H,{minFilter:THREE.NearestFilter, magFilter:THREE.NearestFilter, depthBuffer:true, stencilBuffer:false, generateMipmaps:false});
+  try{
+    const beauty=capBeauty(cam,W,H,opt.passes||24);
+    CAP.zMax=Math.max(50, cam.far||600);
+    const dp=capFlip(capPass(cam, rt, (o,m)=>capMat('depth',m.side)),W,H), np=capFlip(capPass(cam, rt, (o,m)=>capMat('normal',m.side)),W,H);
+    const idOf=new Map(), cols=new Map(); items().forEach((it,i)=>{ const c=capColor(i); idOf.set(it.id,c); cols.set((c[0]<<16)|(c[1]<<8)|c[2], it.id); });
+    const ip=capFlip(capPass(cam, rt, (o,m)=>{ const id=o.userData.itemId; return id!=null&&idOf.has(id)?capMat('item',m.side,idOf.get(id)):capMat('shell',m.side); }),W,H);
+    const d=new Float32Array(N), id=new Int32Array(N), cnt=new Map(); let hits=0;
+    for(let i=0;i<N;i++){ const j=i*4; if(dp[j+3]<128){ d[i]=0; id[i]=-1; continue; } d[i]=((dp[j]*65536+dp[j+1]*256+dp[j+2])/16777215)*CAP.zMax; hits++;
+      const c=(ip[j]<<16)|(ip[j+1]<<8)|ip[j+2]; id[i]=c; if(cols.has(c)) cnt.set(c,(cnt.get(c)||0)+1); }
+    /* depth as an inverse-depth grey image (near is white), the way depth-guided image models expect it */
+    const inv=[]; for(let i=0;i<N;i+=7) if(d[i]>0) inv.push(1/d[i]); inv.sort((a,b)=>a-b); const lo=inv.length?inv[Math.floor(inv.length*.01)]:0, hi=inv.length?inv[Math.floor(inv.length*.995)]:1;
+    const depth=capPng(W,H,o=>{ for(let i=0;i<N;i++){ const v=d[i]>0?Math.round(255*clamp((1/d[i]-lo)/Math.max(1e-9,hi-lo),0,1)):0; o[i*4]=o[i*4+1]=o[i*4+2]=v; o[i*4+3]=255; } }, opt.depthJpeg?'image/jpeg':'image/png', .92);
+    /* outlines: where the piece or surface changes, where a surface folds, and where depth jumps */
+    const nx=i=>np[i*4]/127.5-1, ny=i=>np[i*4+1]/127.5-1, nz=i=>np[i*4+2]/127.5-1, edge=new Uint8Array(N);
+    const brk=(a,b,c)=>{ if(id[a]!==id[b]) return true; if(id[a]<0) return false; if(nx(a)*nx(b)+ny(a)*ny(b)+nz(a)*nz(b)<.82) return true;
+      return c>=0&&id[c]===id[a]&&Math.abs(1/d[c]-2/d[a]+1/d[b])>.02/d[a]; }; // inverse depth is linear across a flat surface, so only real jumps show
+    for(let y=0;y<H;y++) for(let x=0;x<W;x++){ const i=y*W+x;
+      if(x<W-1&&brk(i,i+1,x>0?i-1:-1)){ edge[i]=1; edge[i+1]=1; } if(y<H-1&&brk(i,i+W,y>0?i-W:-1)){ edge[i]=1; edge[i+W]=1; } }
+    const lines=capPng(W,H,o=>{ for(let i=0;i<N;i++){ const v=edge[i]?0:255; o[i*4]=o[i*4+1]=o[i*4+2]=v; o[i*4+3]=255; } });
+    const ids=capPng(W,H,o=>{ for(let i=0;i<N;i++){ const j=i*4; o[j]=ip[j]; o[j+1]=ip[j+1]; o[j+2]=ip[j+2]; o[j+3]=255; if(id[i]<0) o[j]=o[j+1]=o[j+2]=0; } });
+    const seen=[...cnt].map(([c,n])=>({it:byId(cols.get(c)), c, share:n/N})).filter(s=>s.it&&s.share>=.004).sort((a,b)=>b.share-a.share)
+      .map(s=>({id:s.it.id, type:s.it.type, name:itemName(s.it), desc:capDesc(s.it), color:'#'+s.c.toString(16).padStart(6,'0'), share:+s.share.toFixed(4)}));
+    const img=capPng(W,H,o=>{ o.set(beauty); for(let i=3;i<o.length;i+=4) o[i]=255; },'image/jpeg',.9);
+    return { w:W, h:H, ar, beauty:img, depth, lines, ids, items:seen, where:capWhere(), light:ENVK==='house'?dayOf().label:LIGHTS[S.light].label, hits:hits/N,
+      view:{ mode, focus:FOCUS, orbit:Object.assign({},orbit), walk:Object.assign({},walk), plan:Object.assign({},plan), feet:wk.feet||0, seated:wk.seated, eye:wk.eye, light:S.light } }; }
+  finally{ rt.dispose(); dirty(); } }
 /* reflection probe: a cube view of the room from its middle, prefiltered so glossy things reflect the actual room and every surface picks
    up light bounced off the walls, floor and screen */
 const canvasEnv=scene.environment, PROBE={ cam:null, rt:null, pm:null, out:null, want:true, ready:false };
@@ -2469,7 +2603,7 @@ $('#tUndo').addEventListener('click', undo); $('#iUndo').addEventListener('click
 /* ---------- item operations ---------- */
 let inspOpen=false;
 function select(id){ const fresh=id!==selId; if(fresh) inspOpen=false; selId=id; attachSel(); updateGuides(); const sh=$('#sItem');
-  if(id){ ['sAdd','sLayout','sRoom'].forEach(s=>$('#'+s).hidden=true); app.classList.remove('tall'); dockOn(null); sh.hidden=false; sh.classList.toggle('compact',!inspOpen); renderInspector(); if(fresh) $('#iBody').scrollTop=0; }
+  if(id){ ['sAdd','sLayout','sRoom','sPhotos'].forEach(s=>$('#'+s).hidden=true); app.classList.remove('tall'); dockOn(null); sh.hidden=false; sh.classList.toggle('compact',!inspOpen); renderInspector(); if(fresh) $('#iBody').scrollTop=0; }
   else sh.hidden=true;
   syncUiB(); dirtyUi(); }
 function syncUiB(){ VR=null; requestAnimationFrame(()=>{ const sh=$('#sItem'); if(!sh.hidden && !SIDE()) app.style.setProperty('--ui-b', sh.offsetHeight+'px'); else app.style.removeProperty('--ui-b'); VR=null; dirtyUi(); }); }
@@ -2635,9 +2769,9 @@ $('#sItem').addEventListener('change', e=>{ const inp=e.target.closest('input[da
   commit(it); });
 
 /* ---------- sheets ---------- */
-const SHEETS=['sItem','sAdd','sLayout','sRoom','sHelp'];
+const SHEETS=['sItem','sAdd','sLayout','sRoom','sPhotos','sHelp'];
 function dockOn(id){ document.querySelectorAll('.dock button').forEach(b=>b.classList.toggle('on', b.id===id)); }
-function openSheet(id){ SHEETS.forEach(s=>{ $('#'+s).hidden=(s!==id); }); syncSaveUi(); app.classList.toggle('tall', id!=='sItem'); dockOn({sAdd:'tAdd',sLayout:'tLayout',sRoom:'tRoom'}[id]||null); syncUiB(); }
+function openSheet(id){ SHEETS.forEach(s=>{ $('#'+s).hidden=(s!==id); }); syncSaveUi(); app.classList.toggle('tall', id!=='sItem'); dockOn({sAdd:'tAdd',sLayout:'tLayout',sRoom:'tRoom',sPhotos:'tPhotos'}[id]||null); syncUiB(); }
 function closeSheets(){ SHEETS.forEach(s=>{ $('#'+s).hidden=true; }); syncSaveUi(); app.classList.remove('tall'); dockOn(null); syncUiB(); }
 document.querySelectorAll('.sheet [data-act="close"]').forEach(b=>b.addEventListener('click', ()=>{ const sh=b.closest('.sheet'); sh.hidden=true; syncSaveUi(); if(sh.id==='sItem') select(null); app.classList.remove('tall'); dockOn(null); syncUiB(); }));
 function toggleSheet(id, render){ if($('#'+id).hidden){ if(placing) endPlace(); if(selId) select(null); render(); openSheet(id); } else closeSheets(); }
@@ -2653,6 +2787,126 @@ $('#editBtn').addEventListener('click', ()=>setEdit(!EDIT));
 $('#tLayout').addEventListener('click', ()=>{ layoutUi={mode:null, renaming:null}; toggleSheet('sLayout', renderLayouts); });
 $('#tRoom').addEventListener('click', ()=>toggleSheet('sRoom', renderRoom));
 $('#helpBtn').addEventListener('click', ()=>toggleSheet('sHelp', ()=>{}));
+
+/* ---------- Photos: "Render this view" sends the current view (captureView) to api/render.js, which has an image model turn it into a
+   photograph of the same scene. Photos are kept in this browser (IndexedDB), each with the 3D picture it came from and the view to go back to. ---------- */
+const PHOTO_API='/api/render', PL={ list:[], featured:[], urls:new Map(), cfg:null, busy:'', watch:new Set(), armed:null, open:null };
+const photoById=id=>PL.list.find(x=>x.id===id)||PL.featured.find(x=>x.id===id);
+let PDBP=null;
+function pdb(){ return PDBP||(PDBP=new Promise(res=>{ try{ const r=indexedDB.open('ridgeline-photos',1); r.onupgradeneeded=()=>r.result.createObjectStore('photos',{keyPath:'id'}); r.onsuccess=()=>res(r.result); r.onerror=r.onblocked=()=>res(null); }catch(e){ res(null); } })); }
+function pdbDo(rw, fn){ return pdb().then(db=>new Promise(res=>{ if(!db) return res(null); try{ const t=db.transaction('photos',rw?'readwrite':'readonly'), q=fn(t.objectStore('photos')); t.oncomplete=()=>res(q?q.result:true); t.onerror=t.onabort=()=>res(null); }catch(e){ res(null); } })); }
+function photoPut(p){ return pdbDo(true, s=>{ s.put(p); }); }
+function photoDrop(id){ (PL.urls.get(id)||[]).forEach(u=>URL.revokeObjectURL(u)); PL.urls.delete(id); PL.list=PL.list.filter(p=>p.id!==id); return pdbDo(true, s=>{ s.delete(id); }); }
+function blobUrl(p, k){ if(!(p[k] instanceof Blob)) return ''; let u=PL.urls.get(p.id); if(!u){ u=[]; PL.urls.set(p.id,u); } if(!u[k]) u[k]=URL.createObjectURL(p[k]); return u[k]; }
+function dataBlob(d){ const [h,b]=d.split(','), bin=atob(b), a=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) a[i]=bin.charCodeAt(i); return new Blob([a],{type:h.slice(5,h.indexOf(';'))}); }
+const imgOf=src=>new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=()=>rej(new Error('image')); im.src=src instanceof Blob?URL.createObjectURL(src):src; });
+async function thumbOf(src, W){ const im=await imgOf(src), H=Math.round(W*im.height/im.width), c=document.createElement('canvas'); c.width=W; c.height=H; c.getContext('2d').drawImage(im,0,0,W,H); if(src instanceof Blob) URL.revokeObjectURL(im.src); return c.toDataURL('image/jpeg',.8); }
+/* a fingerprint of the furniture, to tell when a photo no longer matches the layout */
+function layoutSig(){ const s=JSON.stringify(items().map(i=>[i.type,+i.x.toFixed(2),+i.z.toFixed(2),i.rot,i.color,i.w,i.d,i.h,i.diag])); let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return (h>>>0).toString(36); }
+/* what the model is told about the scene: the room, the light, the floor and the main pieces in view */
+function capScene(c){ const w=c.where, v=c.view, house=ENVK==='house';
+  const place=!house?'a home theater with a large screen, theater seating and dark acoustic walls'
+    : v.mode==='orbit'?(v.focus==='house'?'the exterior of a mountain-modern house with stacked stone, cedar siding and dark standing-seam metal roofs on a sloping mountain site':`a cutaway view looking down into the ${w.level} of a mountain-modern house`)
+    : `the ${w.room?w.room.toLowerCase().replace(/ \/ /g,' and ').replace(/ #\d+$/,''):'interior'} on the ${w.level} of a mountain-modern house, with mountain views through the windows`;
+  const light=house?{Midday:'bright midday daylight',Evening:'warm low evening sun, lamps on',Dusk:'dusk, deep blue sky outside, warm interior lamps glowing'}[c.light]
+    :{Bright:'bright, even lighting',Dim:'dimmed lights',Movie:'dark movie lighting lit by the glowing screen'}[c.light];
+  const floor={wood:'wide-plank oak floors',tile:'large stone tile floors',concrete:'polished concrete floor'}[w.floor];
+  const big=capCount(c.items.filter(i=>i.share>=.01).map(i=>i.desc)).slice(0,10);
+  return [place, light, floor, big.length?'furnished with '+big.join(', '):''].filter(Boolean).join('; '); }
+function capCount(list){ const n=new Map(); list.forEach(d=>n.set(d,(n.get(d)||0)+1)); const W=['','','two','three','four','five','six'];
+  return [...n].map(([d,k])=>k<2?d:`${W[k]||'several'} ${d.replace(/(s|x|ch|sh)$/,'$1e')}s`); }
+/* how well the photo lines up with the scene: the share of the 3D outline that has an edge in the photo within a couple of pixels */
+async function photoMatch(photo, lines){ const [a,b]=await Promise.all([imgOf(photo), imgOf(lines)]); const W=384, H=Math.round(W*b.height/b.width);
+  const gray=im=>{ const c=document.createElement('canvas'); c.width=W; c.height=H; const g=c.getContext('2d',{willReadFrequently:true}); g.drawImage(im,0,0,W,H); const d=g.getImageData(0,0,W,H).data, o=new Float32Array(W*H); for(let i=0;i<W*H;i++) o[i]=.299*d[i*4]+.587*d[i*4+1]+.114*d[i*4+2]; return o; };
+  const pa=gray(a), pb=gray(b); [a,b].forEach(im=>{ if(im.src.startsWith('blob:')) URL.revokeObjectURL(im.src); });
+  const mag=new Float32Array(W*H); for(let y=1;y<H-1;y++) for(let x=1;x<W-1;x++){ const i=y*W+x, gx=pa[i-W+1]+2*pa[i+1]+pa[i+W+1]-pa[i-W-1]-2*pa[i-1]-pa[i+W-1], gy=pa[i+W-1]+2*pa[i+W]+pa[i+W+1]-pa[i-W-1]-2*pa[i-W]-pa[i-W+1]; mag[i]=Math.hypot(gx,gy); }
+  const s=Array.from(mag).filter((v,i)=>i%5===0).sort((p,q)=>p-q), th=Math.max(24, s[Math.floor(s.length*.85)]), R=2;
+  let n=0, hit=0; for(let y=R;y<H-R;y++) for(let x=R;x<W-R;x++){ if(pb[y*W+x]>=128) continue; n++; let f=false; for(let dy=-R;dy<=R&&!f;dy++) for(let dx=-R;dx<=R;dx++) if(mag[(y+dy)*W+x+dx]>=th){ f=true; break; } if(f) hit++; }
+  return n?+(hit/n).toFixed(3):null; }
+async function photoCfg(fresh){ if(PL.cfg&&!fresh) return PL.cfg; let c={ok:false, reason:'site-only'};
+  if(!IN_CLAUDE&&/^https?:$/.test(location.protocol)){ c={ok:false, reason:'offline'}; try{ const r=await fetch(PHOTO_API,{cache:'no-store'}); if(r.ok) c=await r.json(); }catch(e){} }
+  PL.cfg=c; if(!$('#sPhotos').hidden) renderPhotos(); return c; }
+async function renderThisView(){ if(PL.busy) return; if(mode==='plan'){ toast('Switch to 3D or Walk to render a photo'); return; }
+  const cfg=await photoCfg(true); if(!cfg.ok){ toast(cfg.reason==='not-configured'?'Photo rendering is not set up yet':'Photo rendering works on the website'); return; } if(cfg.paused){ toast(cfg.paused); return; }
+  PL.busy='Capturing the view…'; renderPhotos(); await new Promise(r=>requestAnimationFrame(()=>setTimeout(r,40)));
+  let cap; try{ cap=captureView({long:1536, depthJpeg:true}); }catch(e){ PL.busy=''; renderPhotos(); toast('This view could not be captured'); return; }
+  const rec={ id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), created:Date.now(), status:'sending', where:cap.where, light:cap.light, view:cap.view, sig:layoutSig(),
+    items:cap.items.map(i=>({id:i.id, desc:i.desc, share:i.share})), w:cap.w, h:cap.h, ar:cap.ar, scene:capScene(cap), render:dataBlob(cap.beauty), lines:dataBlob(cap.lines), thumb:await thumbOf(cap.beauty,360).catch(()=>'') };
+  PL.list.unshift(rec); PL.busy='Sending it to the photo studio…'; renderPhotos(); await photoPut(rec);
+  try{ const r=await fetch(PHOTO_API,{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({image:cap.beauty, lines:cap.lines, depth:cap.depth, w:cap.w, h:cap.h, aspect:cap.ar, scene:rec.scene})});
+    const j=await r.json().catch(()=>({})); if(!r.ok||!j.job) throw new Error(j.error||'The photo service did not answer. Try again in a minute.');
+    Object.assign(rec,{job:j.job, model:j.model, status:'rendering', sent:Date.now()}); if(PL.cfg) PL.cfg.left=j.left; await photoPut(rec); photoWatch(rec); }
+  catch(e){ Object.assign(rec,{status:'failed', error:e.message}); await photoPut(rec); }
+  finally{ PL.busy=''; renderPhotos(); } }
+async function photoFetch(url, job){ for(const u of [url, PHOTO_API+'?get=1&job='+encodeURIComponent(job)]){ try{ const r=await fetch(u); if(r.ok){ const b=await r.blob(); if(b.size>1000&&/^image\//.test(b.type)) return b; } }catch(e){} } return null; }
+async function photoWatch(rec){ if(PL.watch.has(rec.id)) return; PL.watch.add(rec.id); const t0=rec.sent||Date.now();
+  try{ while(rec.status==='rendering'&&PL.list.includes(rec)){ await new Promise(r=>setTimeout(r,2500)); let j=null;
+      try{ j=await (await fetch(PHOTO_API+'?job='+encodeURIComponent(rec.job),{cache:'no-store'})).json(); }catch(e){}
+      if(j&&j.status==='done'){ const b=await photoFetch(j.image, rec.job); if(!b) Object.assign(rec,{status:'failed', error:'The photo was made but could not be downloaded.'});
+        else { Object.assign(rec,{photo:b, status:'done', done:Date.now()}); rec.pthumb=await thumbOf(b,360).catch(()=>''); rec.match=await photoMatch(b, rec.lines).catch(()=>null); toast('Your photo is ready'); } }
+      else if(j&&j.status==='failed') Object.assign(rec,{status:'failed', error:j.error||'The photo service could not make this one.'});
+      else if(j) rec.stage=j.status;
+      if(rec.status==='rendering'&&Date.now()-t0>12*60e3) Object.assign(rec,{status:'failed', error:'This one took too long. Try again.'});
+      if(!$('#sPhotos').hidden) renderPhotos(); }
+    if(PL.list.includes(rec)) await photoPut(rec); }
+  finally{ PL.watch.delete(rec.id); renderPhotos(); if(PL.open===rec.id) photoOpen(rec.id); } }
+async function photoLoad(){ const all=await pdbDo(false, s=>s.getAll()); PL.list=(all||[]).sort((a,b)=>b.created-a.created);
+  for(const p of PL.list){ if(p.status==='sending') Object.assign(p,{status:'failed', error:'The page was closed before this was sent.'}); if(p.status==='rendering') photoWatch(p); }
+  syncPhotoDot(); }
+/* Featured photos ship with the site in photos/ (listed in photos/index.json by scripts/add-featured-photo.py), so every visitor sees them */
+let featP=null;
+function photoFeatured(){ return featP||(featP=(IN_CLAUDE?Promise.resolve([]):fetch('photos/index.json',{cache:'no-cache'}).then(r=>r.ok?r.json():[]).catch(()=>[])).then(list=>{
+  PL.featured=(Array.isArray(list)?list:[]).map(e=>({ id:'f:'+e.id, featured:true, status:'done', created:Date.parse(e.created+'T12:00:00')||0, where:{room:e.title, level:e.level}, light:e.light, view:e.view,
+    w:e.w, h:e.h, match:e.match, model:e.model, url:'photos/'+e.photo, renderUrl:'photos/'+e.render })); if(!$('#sPhotos').hidden) renderPhotos(); })); }
+function syncPhotoDot(){ $('#photoDot').hidden=!PL.list.some(p=>p.status==='rendering'||p.status==='sending'); }
+const CAM_SVG='<svg viewBox="0 0 24 24"><path d="M4 8.5h3.2L8.8 6h6.4l1.6 2.5H20V19H4z"/><circle cx="12" cy="13.2" r="3.4"/></svg>';
+function renderPhotos(){ syncPhotoDot(); const b=$('#photoBody'); if(!b) return; const cfg=PL.cfg, n=PL.list.filter(p=>p.status==='done').length;
+  $('#photoMeta').textContent=n?`${n} photo${n>1?'s':''} on this device`:'Photographs of views you choose';
+  let why='', can=false;
+  if(!cfg) why='Checking the photo service…';
+  else if(!cfg.ok) why=cfg.reason==='not-configured'?'Photo rendering is not switched on for this site yet.':cfg.reason==='site-only'?'Photo rendering works on the website, not in this preview.':'The photo service could not be reached. Check your connection.';
+  else if(cfg.paused) why=cfg.paused;
+  else if(mode==='plan') why='Switch to 3D or Walk, frame the view you want, then render it.';
+  else { can=!PL.busy; why=PL.busy||`Makes a photograph of exactly what you see: same room, same furniture in the same spots. Takes about half a minute.${cfg.left!=null?` ${cfg.left} left today.`:''}`; }
+  const card=p=>{ const st=p.status, img=p.featured?p.url:st==='done'?(p.pthumb||blobUrl(p,'photo')):p.thumb, room=p.where&&(p.where.room||p.where.level)||'View';
+    const badge=st==='done'?'':st==='failed'?'<span class="pbadge bad">Didn’t work</span>':`<span class="pbadge"><i class="spin"></i>${st==='sending'?'Sending':p.stage==='queued'?'Waiting':'Rendering'}</span>`;
+    return `<button class="pcard${p.featured?' feat':''}${st!=='done'?' pending':''}" data-pid="${p.id}"><img src="${img}" alt="">${badge}<span class="pcap"><b>${esc(room)}</b><i>${p.featured?esc(p.model||''):esc(when(p.created))}${p.light?' · '+esc(p.light):''}</i></span></button>`; };
+  b.innerHTML=`<div class="pcta"><button class="btn pri go" id="pRender"${can?'':' disabled'}>${CAM_SVG}Render this view</button><p class="note">${esc(why)}</p></div>`
+    +(PL.featured.length?`<div><div class="lab">Featured</div><div class="pgrid">${PL.featured.map(card).join('')}</div></div>`:'')
+    +`<div>${PL.featured.length?'<div class="lab">Your photos</div>':''}${PL.list.length?`<div class="pgrid">${PL.list.map(card).join('')}</div>`:`<p class="note">Your photos will appear here. They stay in this browser, like saved layouts.</p>`}</div>`;
+  $('#pRender').onclick=renderThisView; b.querySelectorAll('[data-pid]').forEach(e=>e.onclick=()=>photoOpen(e.dataset.pid)); }
+/* the full-screen photo, with a slider to compare it against the 3D view */
+function photoOpen(id){ const p=photoById(id), v=$('#pview'); if(!p){ photoClose(); return; } PL.open=id; PL.armed=null; v.hidden=false;
+  const done=p.status==='done', room=p.where&&(p.where.room||p.where.level)||'View';
+  $('#pvA').src=p.featured?p.renderUrl:(blobUrl(p,'render')||p.thumb); $('#pvB').src=p.featured?p.url:done?blobUrl(p,'photo'):''; $('#pvB').hidden=!done; $('#pvCmpL').hidden=!done; $('#pvCmp').value=100; photoCmp(); photoFit();
+  $('#pvT').textContent=room+(p.where&&p.where.room&&p.where.level?' · '+p.where.level:'');
+  const notes=p.featured?[`Featured · made with ${p.model||'an image model'}`]:[new Date(p.created).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})];
+  if(p.status==='failed') notes.push(p.error||'This one didn’t work.'); else if(!done) notes.push('Still rendering…');
+  if(done&&p.match!=null&&p.match<.5) notes.push('The photo may not match the 3D view exactly');
+  if(p.sig&&p.sig!==layoutSig()) notes.push('The furniture has changed since');
+  $('#pvM').textContent=notes.join(' · ');
+  $('#pvDl').hidden=!done;
+  const del=$('#pvDel'); del.hidden=!!p.featured; del.classList.remove('armed'); del.textContent='Delete'; }
+function photoFit(){ const p=photoById(PL.open); if(!p) return; const r=$('#pvWrap').getBoundingClientRect(), a=(p.w||16)/(p.h||9); let w=r.width, h=w/a; if(h>r.height){ h=r.height; w=h*a; } const st=$('#pvStage'); st.style.width=Math.round(w)+'px'; st.style.height=Math.round(h)+'px'; }
+addEventListener('resize', ()=>{ if(PL.open) photoFit(); });
+function photoCmp(){ const v=+$('#pvCmp').value; $('#pvB').style.clipPath=`inset(0 0 0 ${100-v}%)`; $('#pview').style.setProperty('--cmp', (100-v)+'%'); $('#pview').classList.toggle('cmp', v<100); }
+function photoClose(){ $('#pview').hidden=true; PL.open=null; }
+function photoGo(p){ const v=p&&p.view; if(!v) return; photoClose(); closeSheets(); if(v.light&&v.light!==S.light){ S.light=v.light; }
+  setFocus(v.focus); setMode(v.mode);
+  if(v.mode==='walk'){ wk.feet=v.feet||0; wk.seated=!!v.seated; wk.eye=v.eye==null?null:v.eye; Object.assign(WG,v.walk); Object.assign(walk,v.walk); wk.started=true; syncSit(); syncEnv(); }
+  else if(v.mode==='orbit') Object.assign(OG,v.orbit); else Object.assign(PG,v.plan);
+  applyLights(); dirty(true); }
+$('#pvCmp').addEventListener('input', photoCmp);
+$('#pvX').addEventListener('click', photoClose);
+$('#pview').addEventListener('click', e=>{ if(e.target.id==='pview') photoClose(); });
+$('#pvGo').addEventListener('click', ()=>photoGo(photoById(PL.open)));
+$('#pvDl').addEventListener('click', ()=>{ const p=photoById(PL.open); if(!p||!(p.photo||p.featured)) return; const room=p.where&&(p.where.room||p.where.level)||'View', a=document.createElement('a');
+  a.href=p.featured?p.url:blobUrl(p,'photo'); a.download=`Ridgeline ${room.replace(/[^\w #-]/g,'')} ${new Date(p.created).toISOString().slice(0,10)}.${p.photo&&p.photo.type==='image/png'?'png':'jpg'}`; document.body.appendChild(a); a.click(); a.remove(); });
+$('#pvDel').addEventListener('click', async ()=>{ const b=$('#pvDel'), id=PL.open; if(PL.armed!==id){ PL.armed=id; b.classList.add('armed'); b.textContent='Tap again to delete'; setTimeout(()=>{ if(PL.armed===id){ PL.armed=null; b.classList.remove('armed'); b.textContent='Delete'; } },3000); return; }
+  PL.armed=null; photoClose(); await photoDrop(id); renderPhotos(); toast('Photo deleted'); });
+addEventListener('keydown', e=>{ if(e.key==='Escape'&&!$('#pview').hidden){ photoClose(); e.stopPropagation(); } }, true);
+$('#tPhotos').addEventListener('click', ()=>{ toggleSheet('sPhotos', renderPhotos); if(!$('#sPhotos').hidden){ photoCfg(true); photoFeatured(); } });
+photoLoad().then(()=>{ if(!$('#sPhotos').hidden) renderPhotos(); });
 $('#tLights').addEventListener('click', ()=>{ const order=['bright','dim','movie']; S.light=order[(order.indexOf(S.light)+1)%3]; applyLights(); save(); toast(ENVK==='house'?`Time of day: ${lightLabel()}`:`Lights: ${lightLabel()}`); });
 document.querySelectorAll('#views button').forEach(b=>b.addEventListener('click', ()=>{ const m=b.dataset.mode; setMode(m, m===mode); }));
 

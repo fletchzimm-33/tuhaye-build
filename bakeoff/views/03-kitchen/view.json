@@ -1,0 +1,118 @@
+{
+ "name": "03-kitchen",
+ "camera": {
+  "name": "03-kitchen",
+  "focus": "main",
+  "walk": [
+   21,
+   70,
+   40,
+   82,
+   -0.12
+  ]
+ },
+ "w": 1536,
+ "h": 864,
+ "ar": "16:9",
+ "items": [
+  {
+   "id": 68,
+   "type": "dining",
+   "name": "Dining table",
+   "desc": "white oak dining table",
+   "color": "#f0c442",
+   "share": 0.1321
+  },
+  {
+   "id": 77,
+   "type": "chair",
+   "name": "Dining chair",
+   "desc": "oatmeal upholstered dining chair",
+   "color": "#2911d4",
+   "share": 0.0162
+  },
+  {
+   "id": 70,
+   "type": "chair",
+   "name": "Dining chair",
+   "desc": "oatmeal upholstered dining chair",
+   "color": "#42f05f",
+   "share": 0.0129
+  },
+  {
+   "id": 166,
+   "type": "ring",
+   "name": "Ring chandelier",
+   "desc": "brass ring chandelier",
+   "color": "#116dd4",
+   "share": 0.008
+  },
+  {
+   "id": 71,
+   "type": "chair",
+   "name": "Dining chair",
+   "desc": "oatmeal upholstered dining chair",
+   "color": "#d4112a",
+   "share": 0.0071
+  },
+  {
+   "id": 73,
+   "type": "chair",
+   "name": "Dining chair",
+   "desc": "oatmeal upholstered dining chair",
+   "color": "#9cd411",
+   "share": 0.0062
+  },
+  {
+   "id": 72,
+   "type": "chair",
+   "name": "Dining chair",
+   "desc": "oatmeal upholstered dining chair",
+   "color": "#428bf0",
+   "share": 0.0053
+  },
+  {
+   "id": 78,
+   "type": "chair",
+   "name": "Dining chair",
+   "desc": "oatmeal upholstered dining chair",
+   "color": "#60f042",
+   "share": 0.0046
+  }
+ ],
+ "where": {
+  "room": "Dining / Kitchen",
+  "level": "main level",
+  "floor": "wood"
+ },
+ "light": "Midday",
+ "hits": 0.9903798044463734,
+ "view": {
+  "mode": "walk",
+  "focus": "main",
+  "orbit": {
+   "theta": -0.8,
+   "phi": 1.02,
+   "r": 109.7517739534378,
+   "tx": -30.713603777982456,
+   "ty": 13,
+   "tz": -41.61525751032455
+  },
+  "walk": {
+   "x": -18,
+   "z": -46.58,
+   "y": 16.833333333333332,
+   "yaw": -2.1341125882868646,
+   "pitch": -0.12
+  },
+  "plan": {
+   "cx": 0,
+   "cz": 0,
+   "vh": 40
+  },
+  "feet": 11.5,
+  "seated": false,
+  "eye": null,
+  "light": "bright"
+ }
+}

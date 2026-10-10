@@ -1,0 +1,110 @@
+{
+ "name": "04-primary-bedroom",
+ "camera": {
+  "name": "04-primary-bedroom",
+  "focus": "main",
+  "walk": [
+   32,
+   25.5,
+   19,
+   13,
+   -0.14
+  ]
+ },
+ "w": 1536,
+ "h": 864,
+ "ar": "16:9",
+ "items": [
+  {
+   "id": 83,
+   "type": "bed",
+   "name": "King bed",
+   "desc": "sage paint upholstered king bed",
+   "color": "#11d45a",
+   "share": 0.1072
+  },
+  {
+   "id": 177,
+   "type": "rug",
+   "name": "Area rug",
+   "desc": "oatmeal area rug",
+   "color": "#42f07a",
+   "share": 0.0576
+  },
+  {
+   "id": 178,
+   "type": "bench",
+   "name": "Bench",
+   "desc": "oatmeal upholstered bench",
+   "color": "#d41711",
+   "share": 0.0356
+  },
+  {
+   "id": 176,
+   "type": "art",
+   "name": "Framed art",
+   "desc": "white framed art",
+   "color": "#8911d4",
+   "share": 0.025
+  },
+  {
+   "id": 85,
+   "type": "nightstand",
+   "name": "Nightstand",
+   "desc": "walnut nightstand",
+   "color": "#113bd4",
+   "share": 0.0214
+  },
+  {
+   "id": 175,
+   "type": "tlamp",
+   "name": "Table lamp",
+   "desc": "white table lamp",
+   "color": "#f0df42",
+   "share": 0.0083
+  },
+  {
+   "id": 86,
+   "type": "accent",
+   "name": "Velvet accent chair",
+   "desc": "olive upholstered velvet accent chair",
+   "color": "#9af042",
+   "share": 0.004
+  }
+ ],
+ "where": {
+  "room": "Primary Bedroom",
+  "level": "main level",
+  "floor": "wood"
+ },
+ "light": "Midday",
+ "hits": 0.9793806664737654,
+ "view": {
+  "mode": "walk",
+  "focus": "main",
+  "orbit": {
+   "theta": -0.8,
+   "phi": 1.02,
+   "r": 109.7517739534378,
+   "tx": -30.713603777982456,
+   "ty": 13,
+   "tz": -41.61525751032455
+  },
+  "walk": {
+   "x": -7,
+   "z": -91.08,
+   "y": 16.833333333333332,
+   "yaw": 0.805003494254653,
+   "pitch": -0.14
+  },
+  "plan": {
+   "cx": 0,
+   "cz": 0,
+   "vh": 40
+  },
+  "feet": 11.5,
+  "seated": false,
+  "eye": null,
+  "light": "bright"
+ }
+}

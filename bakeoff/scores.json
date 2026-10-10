@@ -1,0 +1,136 @@
+{
+ "grok-image-2-low": {
+  "01-great-room": {
+   "match": 0.878,
+   "pieces_kept": 7,
+   "pieces": 7,
+   "lost": [],
+   "wall_clutter": 0.001,
+   "reframed": false,
+   "best_shift": {
+    "match": 0.878,
+    "zoom": 1.0,
+    "dx": 0,
+    "dy": 0
+   },
+   "piece_detail": [
+    {
+     "id": 59,
+     "desc": "oatmeal area rug",
+     "share": 0.09,
+     "match": 0.974,
+     "kept": true
+    },
+    {
+     "id": 157,
+     "desc": "rust upholstered velvet accent chair",
+     "share": 0.0323,
+     "match": 0.651,
+     "kept": true
+    },
+    {
+     "id": 57,
+     "desc": "oatmeal upholstered sofa",
+     "share": 0.0318,
+     "match": 0.921,
+     "kept": true
+    },
+    {
+     "id": 60,
+     "desc": "white oak coffee table",
+     "share": 0.0156,
+     "match": 0.957,
+     "kept": true
+    },
+    {
+     "id": 155,
+     "desc": "ivory upholstered curved velvet sofa",
+     "share": 0.0146,
+     "match": 0.917,
+     "kept": true
+    },
+    {
+     "id": 164,
+     "desc": "black framed art",
+     "share": 0.0129,
+     "match": 1.0,
+     "kept": true
+    },
+    {
+     "id": 156,
+     "desc": "rust upholstered velvet accent chair",
+     "share": 0.0119,
+     "match": 0.729,
+     "kept": true
+    }
+   ]
+  }
+ },
+ "seedream-5-flash-2k": {
+  "01-great-room": {
+   "match": 0.837,
+   "pieces_kept": 7,
+   "pieces": 7,
+   "lost": [],
+   "wall_clutter": 0.002,
+   "reframed": false,
+   "best_shift": {
+    "match": 0.837,
+    "zoom": 1.0,
+    "dx": 0,
+    "dy": 0
+   },
+   "piece_detail": [
+    {
+     "id": 59,
+     "desc": "oatmeal area rug",
+     "share": 0.09,
+     "match": 0.96,
+     "kept": true
+    },
+    {
+     "id": 157,
+     "desc": "rust upholstered velvet accent chair",
+     "share": 0.0323,
+     "match": 0.64,
+     "kept": true
+    },
+    {
+     "id": 57,
+     "desc": "oatmeal upholstered sofa",
+     "share": 0.0318,
+     "match": 0.907,
+     "kept": true
+    },
+    {
+     "id": 60,
+     "desc": "white oak coffee table",
+     "share": 0.0156,
+     "match": 0.888,
+     "kept": true
+    },
+    {
+     "id": 155,
+     "desc": "ivory upholstered curved velvet sofa",
+     "share": 0.0146,
+     "match": 0.862,
+     "kept": true
+    },
+    {
+     "id": 164,
+     "desc": "black framed art",
+     "share": 0.0129,
+     "match": 1.0,
+     "kept": true
+    },
+    {
+     "id": 156,
+     "desc": "rust upholstered velvet accent chair",
+     "share": 0.0119,
+     "match": 0.744,
+     "kept": true
+    }
+   ]
+  }
+ }
+}

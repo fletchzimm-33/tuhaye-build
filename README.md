@@ -17,9 +17,10 @@ floors, wall colors and lighting, and save layouts.
 ## Using it
 
 - The control card at the top left picks the **View** (**3D** spins the model, **Walk** puts you inside at eye height, **Plan** is the floor plan with room names) and the **Level** (**Exterior**, **Main level**, **Lower level** or the **Theater**). On a phone the same controls sit in two rows across the top.
-- The dock along the bottom has **Add**, **Layouts**, **Finishes** (the theater's floor, walls, ceiling and size), the light button (midday, evening and dusk outside; Bright, Dim and Movie in the theater) and **Undo**.
+- The dock along the bottom has **Add**, **Layouts**, **Finishes** (the theater's floor, walls, ceiling and size), the light button (midday, evening and dusk outside; Bright, Dim and Movie in the theater), **Photos** and **Undo**.
 - The house opens furnished with "Layout 1" (the furnished theater plus furniture in every room). Those pieces are ordinary furniture: move, change or delete them.
 - **Add** also has lighting (ring chandelier, globe, linear and drum pendants, table and floor lamps, sconces) and décor (plants, flowers, art in several styles, books, bowls, rugs). Lamps, vases and books set on a table, dresser or counter sit on top of it and move with it. Pendants hang from whatever ceiling is above them, and in Photo-real quality the lamps really light the room, most visibly in the evening and at dusk.
+- **Photos → Render this view** turns what you see (3D or Walk) into a photograph of the same room with the furniture where you put it, in about half a minute. Photos stay in that browser; open one to compare it with the 3D view, go back to that view, download or delete it. See [Render this view](#render-this-view) for switching it on.
 - Furniture is locked so looking around never moves anything. Tap **Edit furniture** to move, add or delete pieces, and **Done editing** to lock them again.
 
 ## What's here
@@ -34,7 +35,10 @@ floors, wall colors and lighting, and save layouts.
 | `models/` | Scanned furniture and décor (curved velvet sofa, velvet accent chair, pouf, potted plant, vase of flowers) as compressed glTF, plus the three.js r128 glTF loader. Fetched only when a layout uses them. |
 | `scripts/build-site.py` | Rebuilds `index.html` from `src/app.html` (adds the page shell, phone viewport, link-preview tags). |
 | `scripts/fetch-assets.sh`, `scripts/build-textures.py`, `scripts/pack-models.mjs` | Download the scanned sources, then rebuild `tex/` and `models/` from them. |
-| `tests/` | Browser tests (Playwright). See `tests/README.md`. |
+| `api/render.js` | The server side of **Render this view** (a Vercel Function): holds the image service key, checks the limits, starts the job and hands back the finished photo. |
+| `photos/` | Featured photos for the Photos panel (`index.json` lists them), added with `scripts/add-featured-photo.py`. |
+| `bakeoff/`, `scripts/bakeoff-score.py`, `tests/bakeoff-views.mjs` | The image-model bake-off: ten views of the house with their guide images, and the script that scores how well each model's photos line up with them. |
+| `tests/` | Browser tests (Playwright) and a test of `api/render.js`. See `tests/README.md`. |
 
 Coordinates in `data/` are feet in the plans' own frame: X east of grid line A, Z south of grid line 1, heights above the lower floor (6766′-6″); the main floor is 11′-6″ above it.
 
@@ -48,7 +52,27 @@ Coordinates in `data/` are feet in the plans' own frame: X east of grid line A, 
 ## Deploying on Vercel
 
 Import the repo in Vercel and keep the defaults: framework preset **Other**, no build command, output directory = repo root.
-`.vercelignore` keeps `src/`, `data/`, `scripts/` and `tests/` out of the deployment, so only the page and its images are served.
+`.vercelignore` keeps `src/`, `data/`, `scripts/`, `tests/` and the research and bake-off folders out of the deployment, so only the page, its images and `api/` are served.
+
+## Render this view
+
+**Photos → Render this view** captures the current view three ways: the Photo-real picture, an outline drawing of the exact geometry, and a depth map (`captureView` in `src/app.html`). It posts them with a short description of the room (its name, the light, the floor and the main pieces in view) to `api/render.js`. That function sends them to an image model with instructions to keep the camera, walls, windows and every piece of furniture exactly where they are, and only make the materials and light real. The page polls until the photo is ready, saves it in the browser (IndexedDB) and checks how well its edges line up with the outline drawing. A photo whose edges match less than half of the outline is marked as possibly not matching the 3D view.
+
+The button stays hidden until the site has a key. To switch it on, in Vercel → Project → Settings → Environment Variables:
+
+| Variable | What it is |
+| --- | --- |
+| `FAL_KEY` | API key from [fal.ai](https://fal.ai) (pay as you go). Required. |
+| `RENDER_MODEL` | `nano-banana-pro` (default, about $0.15 a photo at 2K), `nano-banana-2`, `seedream` (Seedream 4.5, about $0.04), `seedream-5-lite` (Seedream 5.0 Lite, about $0.04; the Seedream family made the most photographic bake-off photo), `flux-2-pro` or `flux-depth`. |
+| `RENDER_SECRET` | Any long random string. Signs job tickets and hashes visitor addresses. |
+| `RENDER_DAILY_PER_VISITOR` | Photos per visitor per day (default 5). |
+| `RENDER_DAILY_TOTAL` | Photos per day across everyone (default 100). |
+| `RENDER_MONTHLY_BUDGET` | US dollars a month; rendering pauses once the estimated spend reaches it (default 20). |
+| `KV_REST_API_URL`, `KV_REST_API_TOKEN` | An Upstash Redis database (Vercel → Storage → Marketplace, free tier), so the limits hold across Vercel's servers. Without one they are counted per server instance, which is much looser. |
+
+Then redeploy. Also set a spending limit or a prepaid balance on the fal.ai account itself as the last line of defence.
+
+**Featured photos.** The Photos panel also has a Featured section that every visitor sees: photos shipped with the site in `photos/`, listed in `photos/index.json`, each next to the 3D view it was made from (so the compare slider and Go to this view work). Add one with `python3 scripts/add-featured-photo.py bakeoff/views/<view> <photo file> --model "<model name>"`, then rebuild and commit. These work without any image service key. Which model is the default should follow the bake-off (`bakeoff/`).
 
 ## How saving works on the site
 

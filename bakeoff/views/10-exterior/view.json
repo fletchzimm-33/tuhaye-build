@@ -1,0 +1,51 @@
+{
+ "name": "10-exterior",
+ "camera": {
+  "name": "10-exterior",
+  "focus": "house",
+  "orbit": {
+   "theta": -0.8,
+   "phi": 1.08,
+   "r": 118
+  },
+  "light": "dim"
+ },
+ "w": 1536,
+ "h": 864,
+ "ar": "16:9",
+ "items": [],
+ "where": {
+  "room": "",
+  "level": "exterior"
+ },
+ "light": "Evening",
+ "hits": 0.9967071156442902,
+ "view": {
+  "mode": "orbit",
+  "focus": "house",
+  "orbit": {
+   "theta": -0.8,
+   "phi": 1.08,
+   "r": 118,
+   "tx": -30.713603777982456,
+   "ty": 13,
+   "tz": -41.61525751032455
+  },
+  "walk": {
+   "x": -0.7999999999999972,
+   "z": -54.28,
+   "y": 16.833333333333332,
+   "yaw": 1.1893429802686275,
+   "pitch": -0.06
+  },
+  "plan": {
+   "cx": 0,
+   "cz": 0,
+   "vh": 40
+  },
+  "feet": 11.5,
+  "seated": false,
+  "eye": null,
+  "light": "dim"
+ }
+}

@@ -1,0 +1,67 @@
+{
+ "name": "09-main-level-3d",
+ "camera": {
+  "name": "09-main-level-3d",
+  "focus": "main",
+  "orbit": {
+   "theta": -0.75,
+   "phi": 0.82,
+   "r": 62
+  }
+ },
+ "w": 1536,
+ "h": 864,
+ "ar": "16:9",
+ "items": [
+  {
+   "id": 91,
+   "type": "bed",
+   "name": "King bed",
+   "desc": "sage paint upholstered king bed",
+   "color": "#11d418",
+   "share": 0.0177
+  },
+  {
+   "id": 96,
+   "type": "dining",
+   "name": "Dining table",
+   "desc": "cognac dining table",
+   "color": "#42f0a6",
+   "share": 0.0065
+  }
+ ],
+ "where": {
+  "room": "",
+  "level": "main level"
+ },
+ "light": "Midday",
+ "hits": 0.9991831838348766,
+ "view": {
+  "mode": "orbit",
+  "focus": "main",
+  "orbit": {
+   "theta": -0.75,
+   "phi": 0.82,
+   "r": 62,
+   "tx": -18.61621766563768,
+   "ty": 13,
+   "tz": -36.507373803148276
+  },
+  "walk": {
+   "x": -0.7999999999999972,
+   "z": -54.28,
+   "y": 16.833333333333332,
+   "yaw": 1.1893429802686275,
+   "pitch": -0.06
+  },
+  "plan": {
+   "cx": 0,
+   "cz": 0,
+   "vh": 40
+  },
+  "feet": 11.5,
+  "seated": false,
+  "eye": null,
+  "light": "bright"
+ }
+}

@@ -1,0 +1,78 @@
+{
+ "name": "07-bedroom-4",
+ "camera": {
+  "name": "07-bedroom-4",
+  "focus": "lower",
+  "walk": [
+   20,
+   71,
+   32,
+   84,
+   -0.14
+  ]
+ },
+ "w": 1536,
+ "h": 864,
+ "ar": "16:9",
+ "items": [
+  {
+   "id": 106,
+   "type": "bed",
+   "name": "King bed",
+   "desc": "sage paint upholstered king bed",
+   "color": "#427df0",
+   "share": 0.0807
+  },
+  {
+   "id": 107,
+   "type": "nightstand",
+   "name": "Nightstand",
+   "desc": "walnut nightstand",
+   "color": "#8dd411",
+   "share": 0.0155
+  },
+  {
+   "id": 193,
+   "type": "tlamp",
+   "name": "Table lamp",
+   "desc": "white table lamp",
+   "color": "#7ef042",
+   "share": 0.0057
+  }
+ ],
+ "where": {
+  "room": "Bedroom #4",
+  "level": "lower level",
+  "floor": "wood"
+ },
+ "light": "Midday",
+ "hits": 0.9999351972415124,
+ "view": {
+  "mode": "walk",
+  "focus": "lower",
+  "orbit": {
+   "theta": -0.8,
+   "phi": 1.02,
+   "r": 109.7517739534378,
+   "tx": -30.713603777982456,
+   "ty": 13,
+   "tz": -41.61525751032455
+  },
+  "walk": {
+   "x": -19,
+   "z": -45.58,
+   "y": 5.333333333333333,
+   "yaw": -2.396173177315635,
+   "pitch": -0.14
+  },
+  "plan": {
+   "cx": 0,
+   "cz": 0,
+   "vh": 40
+  },
+  "feet": 0,
+  "seated": false,
+  "eye": null,
+  "light": "bright"
+ }
+}
