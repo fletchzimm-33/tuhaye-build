@@ -11,6 +11,7 @@
 //   FAL_KEY                    image service key from fal.ai. Without it the button stays hidden.
 //   RENDER_MODEL               nano-banana-pro (default), nano-banana-2, seedream (4.5), seedream-5-lite, flux-2-pro or flux-depth
 //   RENDER_SECRET              any long random string: signs job tickets and hashes visitor addresses
+//   RENDER_PROMPT              optional: your own instruction for the image model, with {scene} where the room description goes
 //   RENDER_DAILY_PER_VISITOR   renders per visitor per day (default 5)
 //   RENDER_DAILY_TOTAL         renders per day across all visitors (default 100)
 //   RENDER_MONTHLY_BUDGET      US dollars a month; the button pauses once estimated spend reaches it (default 20)
@@ -27,17 +28,21 @@ const SECRET = ENV.RENDER_SECRET || crypto.createHash('sha256').update('ridgelin
 const PER_VISITOR = num(ENV.RENDER_DAILY_PER_VISITOR, 5), DAILY_TOTAL = num(ENV.RENDER_DAILY_TOTAL, 100), BUDGET = num(ENV.RENDER_MONTHLY_BUDGET, 20);
 const ASPECTS = ['21:9', '16:9', '3:2', '4:3', '1:1', '3:4', '2:3', '9:16'];
 
-/* The instruction-following models get the render, the outline drawing and the depth map, and are told to keep everything in place. */
-const INSTRUCT = scene => [
-  'The first image is a 3D render of a real house. Turn it into a professional architectural photograph of exactly the same scene.',
-  'Keep the identical camera position, lens, framing and perspective. Keep every wall, ceiling, beam, window, door, stair, railing, fireplace, cabinet and built-in exactly where it is, with the same shape and size.',
-  'Keep every piece of furniture, lamp, rug, plant and artwork in the same place, size, shape, orientation and colour. Do not add, remove, move, resize or restyle anything, and add no people, text or logos.',
-  'The second image is a line drawing of the exact geometry and the third is its depth map (nearer is lighter); the photograph must line up with both.',
-  `Scene: ${scene}.`,
-  'Replace every computer-generated surface with its real material: wood grain and plank seams in wood floors, woven texture and soft creases in upholstery, real rug pile, matte painted walls with subtle variation, real stone, metal and glass with true reflections.',
-  'Light it the way a camera sees a real room, in the light the scene describes: soft bounce light, gentle falloff into corners and contact shadows under every piece of furniture.',
-  'Photographed with a professional full-frame camera at f/8 with natural exposure and accurate colour; sharp, detailed, high-end architectural photography with no CGI or 3D-render look.',
+/* The instruction-following models get the render, the outline drawing and the depth map. The prompt leads with the change (a full
+   re-render into a photograph), because an editing model told mostly to "keep everything" hands back a near-copy; the geometry rule is one
+   line: change how things look, not where they are. RENDER_PROMPT in the environment replaces it, with {scene} where the scene goes. */
+const PROMPT = [
+  'Turn this 3D render (the first image) into a real photograph of the same room, as if a professional architectural photographer shot it on location.',
+  'Re-render the whole image so that nothing looks computer-generated.',
+  'Change how everything looks, not where it is: keep the same camera angle, framing and perspective, and keep every wall, window, door, beam, stair, cabinet and piece of furniture in the same place, size and shape.',
+  'Do not add, remove or rearrange anything, and add no people, text or watermarks.',
+  'The second and third images only guide the exact geometry (an outline drawing and a depth map, nearer is lighter): follow their lines, but do not copy their look.',
+  'Scene: {scene}.',
+  'Make every material real and detailed: wood grain and plank seams in wood floors, woven fabric with soft creases and natural wear on upholstery, real rug pile, matte painted walls with subtle variation, real stone, metal and glass with true reflections.',
+  'Replace flat, even lighting with real light in the conditions described: soft bounce light, gentle shadows into corners and under every piece of furniture, small highlights on glossy surfaces, and a believable view through the windows.',
+  'Shot on a professional full-frame camera with natural exposure, accurate colour and crisp detail. It must read as a photograph, not a rendering.',
 ].join(' ');
+const INSTRUCT = scene => (ENV.RENDER_PROMPT || PROMPT).replace(/\{scene\}/g, scene);
 /* The depth-locked model is not an editor: it takes a description, and the depth map holds the geometry. */
 const DESCRIBE = scene => `Professional architectural photograph, ${scene}. Physically realistic materials, soft natural light, realistic shadows and reflections, sharp focus, high dynamic range, no people, no text.`;
 
