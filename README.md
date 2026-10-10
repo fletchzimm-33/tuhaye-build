@@ -63,7 +63,7 @@ The button stays hidden until the site has a key. To switch it on, in Vercel →
 | Variable | What it is |
 | --- | --- |
 | `FAL_KEY` | API key from [fal.ai](https://fal.ai) (pay as you go). Required. |
-| `RENDER_MODEL` | `nano-banana-pro` (default, about $0.15 a photo at 2K), `nano-banana-2`, `seedream` (Seedream 4.5, about $0.04), `seedream-5-lite` (Seedream 5.0 Lite, about $0.04; the Seedream family made the most photographic bake-off photo), `flux-2-pro` or `flux-depth`. |
+| `RENDER_MODEL` | `nano-banana-pro` (default, about $0.15 a photo at 2K), `nano-banana-2`, `grok` (xAI Grok Imagine at 2K; Grok kept the furniture most exactly in the bake-off), `seedream` (Seedream 4.5, about $0.04), `seedream-5-lite` (Seedream 5.0 Lite, about $0.04; the Seedream family made the most photographic bake-off photo), `flux-2-pro` or `flux-depth`. |
 | `RENDER_SECRET` | Any long random string. Signs job tickets and hashes visitor addresses. |
 | `RENDER_PROMPT` | Optional. Your own instruction for the image model instead of the built-in one (in `api/render.js`), with `{scene}` where the room description goes. Change it and redeploy to try a different wording without touching the code. |
 | `RENDER_DAILY_PER_VISITOR` | Photos per visitor per day (default 5). |

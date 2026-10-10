@@ -61,6 +61,7 @@ ok('scene trimmed', r.code===200 && falCalls.at(-1).body.prompt.length<2200 && !
 falState.reject=true; r=await call(h,'POST','/api/render',view); ok('service error passed on', r.code===422 && /too many images/.test(r.json.error), r.json); falState.reject=false;
 // 5. the other models get the inputs their APIs expect
 for(const [m, want] of [['seedream', b=>b.image_urls.length===3 && b.image_size.width===2560 && b.image_size.height===1440],
+  ['grok', b=>b.image_urls.length===3 && b.resolution==='2k' && /^Turn this 3D render/.test(b.prompt)],
   ['seedream-5-lite', b=>b.image_urls.length===3 && b.image_size.width===2560 && b.image_size.height===1440 && /Do not add/.test(b.prompt)],
   ['flux-2-pro', b=>b.image_urls.length===3 && b.image_size.width===1536 && b.output_format==='jpeg'],
   ['flux-depth', b=>b.image_url===IMG && b.control_lora_image_url===IMG && b.control_lora_strength>0 && !/Do not add/.test(b.prompt)],

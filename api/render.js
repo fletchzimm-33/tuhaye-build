@@ -9,7 +9,7 @@
 //
 // Settings, in Vercel > Project > Settings > Environment Variables:
 //   FAL_KEY                    image service key from fal.ai. Without it the button stays hidden.
-//   RENDER_MODEL               nano-banana-pro (default), nano-banana-2, seedream (4.5), seedream-5-lite, flux-2-pro or flux-depth
+//   RENDER_MODEL               nano-banana-pro (default), nano-banana-2, grok, seedream (4.5), seedream-5-lite, flux-2-pro or flux-depth
 //   RENDER_SECRET              any long random string: signs job tickets and hashes visitor addresses
 //   RENDER_PROMPT              optional: your own instruction for the image model, with {scene} where the room description goes
 //   RENDER_DAILY_PER_VISITOR   renders per visitor per day (default 5)
@@ -54,6 +54,9 @@ const MODELS = {
     input: r => ({ prompt: INSTRUCT(r.scene), image_urls: [r.image, r.lines, r.depth], aspect_ratio: r.aspect, resolution: '2K', output_format: 'jpeg', num_images: 1 }) },
   'nano-banana-2': { id: 'fal-ai/nano-banana-2/edit', usd: 0.08,
     input: r => ({ prompt: INSTRUCT(r.scene), image_urls: [r.image, r.lines, r.depth], aspect_ratio: r.aspect, output_format: 'jpeg', num_images: 1 }) },
+  /* Grok follows the first image's shape; it takes up to three images */
+  'grok': { id: 'xai/grok-imagine-image/edit', usd: 0.07,
+    input: r => ({ prompt: INSTRUCT(r.scene), image_urls: [r.image, r.lines, r.depth], resolution: '2k', output_format: 'jpeg', num_images: 1 }) },
   'seedream': { id: 'fal-ai/bytedance/seedream/v4.5/edit', usd: 0.04,
     input: r => ({ prompt: INSTRUCT(r.scene), image_urls: [r.image, r.lines, r.depth], image_size: atLeast(r, 2560 * 1440), num_images: 1, max_images: 1 }) },
   'seedream-5-lite': { id: 'fal-ai/bytedance/seedream/v5/lite/edit', usd: 0.04,
@@ -139,7 +142,7 @@ module.exports = async function handler(req, res) {
       if (Date.now() - job.t > 6 * 3600e3) return send(res, 410, { status: 'failed', error: 'This render has expired.' });
       const st = await falPoll(job);
       if (q.get('get') && st.status === 'done') { // hand the photo over from here
-        const u = new URL(st.image); if (u.protocol !== 'https:' || !/(^|\.)fal\.(media|run|ai)$/.test(u.hostname)) return send(res, 400, { status: 'failed', error: 'Unexpected image address.' });
+        const u = new URL(st.image); if (u.protocol !== 'https:' || !/(^|\.)(fal\.(media|run|ai)|x\.ai)$/.test(u.hostname)) return send(res, 400, { status: 'failed', error: 'Unexpected image address.' });
         const r = await fetch(u); const buf = Buffer.from(await r.arrayBuffer()); if (!r.ok || buf.length > 4.4e6) return send(res, 502, { status: 'failed', error: 'Could not fetch the photo.' });
         res.statusCode = 200; res.setHeader('Content-Type', r.headers.get('content-type') || 'image/jpeg'); res.setHeader('Cache-Control', 'private, max-age=3600'); return res.end(buf);
       }
