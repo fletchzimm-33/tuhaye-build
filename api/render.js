@@ -9,7 +9,7 @@
 //
 // Settings, in Vercel > Project > Settings > Environment Variables:
 //   FAL_KEY                    image service key from fal.ai. Without it the button stays hidden.
-//   RENDER_MODEL               nano-banana-pro (default), nano-banana-2, seedream, flux-2-pro or flux-depth
+//   RENDER_MODEL               nano-banana-pro (default), nano-banana-2, seedream (4.5), seedream-5-lite, flux-2-pro or flux-depth
 //   RENDER_SECRET              any long random string: signs job tickets and hashes visitor addresses
 //   RENDER_DAILY_PER_VISITOR   renders per visitor per day (default 5)
 //   RENDER_DAILY_TOTAL         renders per day across all visitors (default 100)
@@ -42,13 +42,17 @@ const INSTRUCT = scene => [
 const DESCRIBE = scene => `Professional architectural photograph, ${scene}. Physically realistic materials, soft natural light, realistic shadows and reflections, sharp focus, high dynamic range, no people, no text.`;
 
 const fit = (r, long) => { const k = long / Math.max(r.w, r.h); return { width: Math.round(r.w * k / 16) * 16, height: Math.round(r.h * k / 16) * 16 }; };
+/* Seedream wants at least 2560×1440 pixels in all: the view's own aspect at that area, in multiples of 16 */
+const atLeast = (r, px) => { const k = Math.sqrt(px / (r.w * r.h)), up = v => Math.ceil(v / 16 - 1e-6) * 16; return { width: up(r.w * k), height: up(r.h * k) }; };
 const MODELS = {
   'nano-banana-pro': { id: 'fal-ai/nano-banana-pro/edit', usd: 0.15,
     input: r => ({ prompt: INSTRUCT(r.scene), image_urls: [r.image, r.lines, r.depth], aspect_ratio: r.aspect, resolution: '2K', output_format: 'jpeg', num_images: 1 }) },
   'nano-banana-2': { id: 'fal-ai/nano-banana-2/edit', usd: 0.08,
     input: r => ({ prompt: INSTRUCT(r.scene), image_urls: [r.image, r.lines, r.depth], aspect_ratio: r.aspect, output_format: 'jpeg', num_images: 1 }) },
   'seedream': { id: 'fal-ai/bytedance/seedream/v4.5/edit', usd: 0.04,
-    input: r => ({ prompt: INSTRUCT(r.scene), image_urls: [r.image, r.lines, r.depth], image_size: fit(r, 2048), num_images: 1, max_images: 1 }) },
+    input: r => ({ prompt: INSTRUCT(r.scene), image_urls: [r.image, r.lines, r.depth], image_size: atLeast(r, 2560 * 1440), num_images: 1, max_images: 1 }) },
+  'seedream-5-lite': { id: 'fal-ai/bytedance/seedream/v5/lite/edit', usd: 0.04,
+    input: r => ({ prompt: INSTRUCT(r.scene), image_urls: [r.image, r.lines, r.depth], image_size: atLeast(r, 2560 * 1440), num_images: 1, max_images: 1 }) },
   'flux-2-pro': { id: 'fal-ai/flux-2-pro/edit', usd: 0.09,
     input: r => ({ prompt: INSTRUCT(r.scene), image_urls: [r.image, r.lines, r.depth], image_size: fit(r, 1536), output_format: 'jpeg' }) },
   'flux-depth': { id: 'fal-ai/flux-control-lora-depth/image-to-image', usd: 0.06,
