@@ -63,12 +63,13 @@ The button stays hidden until the site has a key. To switch it on, in Vercel →
 | Variable | What it is |
 | --- | --- |
 | `FAL_KEY` | API key from [fal.ai](https://fal.ai) (pay as you go). Required. |
-| `RENDER_MODEL` | `nano-banana-pro` (default, about $0.15 a photo at 2K), `nano-banana-2`, `grok` (xAI Grok Imagine at 2K; Grok kept the furniture most exactly in the bake-off), `seedream` (Seedream 4.5, about $0.04), `seedream-5-lite` (Seedream 5.0 Lite, about $0.04; the Seedream family made the most photographic bake-off photo), `flux-2-pro` or `flux-depth`. |
+| `RENDER_MODEL` | `seedream-5-flash` (default: Seedream 5.0 Flash, which made the bake-off's best photo; about $0.05 a photo at 2K, the largest size within 2048×2048 pixels), `seedream-5-pro` (Seedream 5.0 Pro, the larger model, about $0.15), `seedream-5-lite` (Seedream 5.0 Lite, about $0.04), `seedream` (Seedream 4.5, about $0.04), `nano-banana-pro` (about $0.15), `nano-banana-2`, `grok` (xAI Grok Imagine at 2K; Grok kept the furniture most exactly in the bake-off), `flux-2-pro` or `flux-depth`. Prices are estimates; set `RENDER_COST_USD` if fal's price differs. |
 | `RENDER_SECRET` | Any long random string. Signs job tickets and hashes visitor addresses. |
-| `RENDER_PROMPT` | Optional. Your own instruction for the image model instead of the built-in one (in `api/render.js`), with `{scene}` where the room description goes. Change it and redeploy to try a different wording without touching the code. |
+| `RENDER_PROMPT` | Optional. Your own instruction for the image model instead of the built-in one (in `api/render.js`), with `{scene}` where the room description goes. Change it and redeploy to try a different wording without touching the code. Seedream 5.0 Flash and Pro get the wording that made the bake-off photo (`FAITHFUL`); the other models get one that leads with the change (`PROMPT`), because Seedream 5.0 Lite handed back a near-copy of the 3D view with the first. |
 | `RENDER_DAILY_PER_VISITOR` | Photos per visitor per day (default 5). |
 | `RENDER_DAILY_TOTAL` | Photos per day across everyone (default 100). |
 | `RENDER_MONTHLY_BUDGET` | US dollars a month; rendering pauses once the estimated spend reaches it (default 20). |
+| `RENDER_COST_USD` | Optional. What one photo costs, if the estimate for the model (in `api/render.js`) is out of date. The monthly budget counts with it. |
 | `KV_REST_API_URL`, `KV_REST_API_TOKEN` | An Upstash Redis database (Vercel → Storage → Marketplace, free tier), so the limits hold across Vercel's servers. Without one they are counted per server instance, which is much looser. |
 
 Then redeploy. Also set a spending limit or a prepaid balance on the fal.ai account itself as the last line of defence.

@@ -9,7 +9,8 @@
 //
 // Settings, in Vercel > Project > Settings > Environment Variables:
 //   FAL_KEY                    image service key from fal.ai. Without it the button stays hidden.
-//   RENDER_MODEL               nano-banana-pro (default), nano-banana-2, grok, seedream (4.5), seedream-5-lite, flux-2-pro or flux-depth
+//   RENDER_MODEL               seedream-5-flash (default), seedream-5-pro, seedream-5-lite, seedream (4.5), nano-banana-pro, nano-banana-2,
+//                              grok, flux-2-pro or flux-depth
 //   RENDER_SECRET              any long random string: signs job tickets and hashes visitor addresses
 //   RENDER_PROMPT              optional: your own instruction for the image model, with {scene} where the room description goes
 //   RENDER_DAILY_PER_VISITOR   renders per visitor per day (default 5)
@@ -42,14 +43,35 @@ const PROMPT = [
   'Replace flat, even lighting with real light in the conditions described: soft bounce light, gentle shadows into corners and under every piece of furniture, small highlights on glossy surfaces, and a believable view through the windows.',
   'Shot on a professional full-frame camera with natural exposure, accurate colour and crisp detail. It must read as a photograph, not a rendering.',
 ].join(' ');
-const INSTRUCT = scene => (ENV.RENDER_PROMPT || PROMPT).replace(/\{scene\}/g, scene);
+/* The prompt that made the bake-off's best photo (Seedream 5.0 Flash, great room): it asks to keep everything and make it a photograph.
+   Flash re-rendered fully from it, so Flash and Pro get it; Seedream 5.0 Lite handed back a near-copy, so the others get PROMPT above. */
+const FAITHFUL = [
+  'The first image is a 3D render of a real house. Turn it into a professional architectural photograph of exactly the same scene.',
+  'Keep the identical camera position, lens, framing and perspective.',
+  'Keep every wall, ceiling, beam, window, door, stair, railing, fireplace, cabinet and built-in exactly where it is, with the same shape and size.',
+  'Keep every piece of furniture, lamp, rug, plant and artwork in the same place, size, shape, orientation and colour.',
+  'Do not add, remove, move, resize or restyle anything, and add no people, text or logos.',
+  'The second image is a line drawing of the exact geometry and the third is its depth map (nearer is lighter); the photograph must line up with both.',
+  'Scene: {scene}.',
+  'Replace every computer-generated surface with its real material: wood grain and plank seams in wood floors, woven texture and soft creases in upholstery, real rug pile, matte painted walls with subtle variation, real stone, metal and glass with true reflections.',
+  'Light it the way a camera sees a real room, in the light the scene describes: soft bounce light, gentle falloff into corners and contact shadows under every piece of furniture.',
+  'Photographed with a professional full-frame camera at f/8 with natural exposure and accurate colour; sharp, detailed, high-end architectural photography with no CGI or 3D-render look.',
+].join(' ');
+const INSTRUCT = (scene, base = PROMPT) => (ENV.RENDER_PROMPT || base).replace(/\{scene\}/g, scene);
 /* The depth-locked model is not an editor: it takes a description, and the depth map holds the geometry. */
 const DESCRIBE = scene => `Professional architectural photograph, ${scene}. Physically realistic materials, soft natural light, realistic shadows and reflections, sharp focus, high dynamic range, no people, no text.`;
 
 const fit = (r, long) => { const k = long / Math.max(r.w, r.h); return { width: Math.round(r.w * k / 16) * 16, height: Math.round(r.h * k / 16) * 16 }; };
 /* Seedream wants at least 2560×1440 pixels in all: the view's own aspect at that area, in multiples of 16 */
 const atLeast = (r, px) => { const k = Math.sqrt(px / (r.w * r.h)), up = v => Math.ceil(v / 16 - 1e-6) * 16; return { width: up(r.w * k), height: up(r.h * k) }; };
+/* Seedream 5.0 Flash and Pro allow at most 2048×2048 pixels in all: the largest size at the view's aspect */
+const atMost = (r, px) => { const k = Math.sqrt(px / (r.w * r.h)), down = v => Math.floor(v / 16 + 1e-6) * 16; return { width: down(r.w * k), height: down(r.h * k) }; };
 const MODELS = {
+  /* ByteDance's newest Seedream: Flash made the bake-off's best photo (on Higgsfield); Pro is the larger model, at about three times the price */
+  'seedream-5-flash': { id: 'bytedance/seedream/v5/flash/edit', usd: 0.05,
+    input: r => ({ prompt: INSTRUCT(r.scene, FAITHFUL), image_urls: [r.image, r.lines, r.depth], image_size: atMost(r, 2048 * 2048), output_format: 'jpeg', num_images: 1 }) },
+  'seedream-5-pro': { id: 'bytedance/seedream/v5/pro/edit', usd: 0.15,
+    input: r => ({ prompt: INSTRUCT(r.scene, FAITHFUL), image_urls: [r.image, r.lines, r.depth], image_size: atMost(r, 2048 * 2048), output_format: 'jpeg', num_images: 1 }) },
   'nano-banana-pro': { id: 'fal-ai/nano-banana-pro/edit', usd: 0.15,
     input: r => ({ prompt: INSTRUCT(r.scene), image_urls: [r.image, r.lines, r.depth], aspect_ratio: r.aspect, resolution: '2K', output_format: 'jpeg', num_images: 1 }) },
   'nano-banana-2': { id: 'fal-ai/nano-banana-2/edit', usd: 0.08,
@@ -66,7 +88,7 @@ const MODELS = {
   'flux-depth': { id: 'fal-ai/flux-control-lora-depth/image-to-image', usd: 0.06,
     input: r => ({ prompt: DESCRIBE(r.scene), image_url: r.image, control_lora_image_url: r.depth, control_lora_strength: 0.8, strength: 0.65, image_size: fit(r, 1536), output_format: 'jpeg', num_images: 1 }) },
 };
-const MODEL_KEY = MODELS[ENV.RENDER_MODEL] ? ENV.RENDER_MODEL : 'nano-banana-pro';
+const MODEL_KEY = MODELS[ENV.RENDER_MODEL] ? ENV.RENDER_MODEL : 'seedream-5-flash';
 const COST = num(ENV.RENDER_COST_USD, MODELS[MODEL_KEY].usd);
 
 /* ---------- limits: an Upstash Redis REST database when configured, else this instance's memory ---------- */
@@ -109,8 +131,9 @@ const falHeaders = () => ({ Authorization: `Key ${ENV.FAL_KEY}`, 'Content-Type':
 const falBase = id => id.split('/').slice(0, 2).join('/'); // status and results live under owner/app, without the sub-path
 async function falJson(r) { const t = await r.text(); try { return JSON.parse(t); } catch (e) { return { detail: t.slice(0, 300) }; } }
 async function falSubmit(model, input) { const r = await fetch(FAL + model.id, { method: 'POST', headers: falHeaders(), body: JSON.stringify(input) }), j = await falJson(r);
-  if (!r.ok || !j.request_id) throw Object.assign(new Error(detail(j) || `image service ${r.status}`), { status: r.status }); return j.request_id; }
-async function falPoll(job) { const base = FAL + falBase(job.e) + '/requests/' + encodeURIComponent(job.id);
+  if (!r.ok || !j.request_id) throw Object.assign(new Error(detail(j) || `image service ${r.status}`), { status: r.status });
+  return { id: j.request_id, url: typeof j.response_url === 'string' && j.response_url.startsWith(FAL) ? j.response_url : undefined }; }
+async function falPoll(job) { const base = job.u || FAL + falBase(job.e) + '/requests/' + encodeURIComponent(job.id); // fal says where the result will be
   const s = await fetch(base + '/status', { headers: falHeaders() }), sj = await falJson(s);
   if (!s.ok) return { status: 'failed', error: detail(sj) || `image service ${s.status}` };
   if (sj.status === 'IN_QUEUE') return { status: 'queued', position: sj.queue_position };
@@ -157,14 +180,14 @@ module.exports = async function handler(req, res) {
     const aspect = ASPECTS.includes(b.aspect) ? b.aspect : '16:9';
     const scene = String(b.scene || 'a mountain-modern home').replace(/[\u0000-\u001f<>{}]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 700);
     const u = await usage(req), why = blocked(u); if (why) return send(res, 429, { error: why });
-    const model = MODELS[MODEL_KEY], id = await falSubmit(model, model.input({ image: b.image, lines: b.lines, depth: b.depth, w, h, aspect, scene }));
+    const model = MODELS[MODEL_KEY], sub = await falSubmit(model, model.input({ image: b.image, lines: b.lines, depth: b.depth, w, h, aspect, scene }));
     const cents = Math.round(COST * 100), ttl = 2 * 86400;
     await kv([['INCRBY', `render:v:${u.v}:${u.d}`, 1], ['EXPIRE', `render:v:${u.v}:${u.d}`, ttl], ['INCRBY', `render:d:${u.d}`, 1], ['EXPIRE', `render:d:${u.d}`, ttl],
       ['INCRBY', `render:usd:${u.m}`, cents], ['EXPIRE', `render:usd:${u.m}`, 40 * 86400]]);
-    return send(res, 200, { job: ticket({ e: model.id, id, t: Date.now() }), model: MODEL_KEY, left: Math.max(0, PER_VISITOR - u.mine - 1) });
+    return send(res, 200, { job: ticket({ e: model.id, id: sub.id, u: sub.url, t: Date.now() }), model: MODEL_KEY, left: Math.max(0, PER_VISITOR - u.mine - 1) });
   } catch (e) {
     return send(res, e.status === 422 ? 422 : 502, { error: e.message ? 'The image service said: ' + e.message : 'Something went wrong.' });
   }
 };
 // for tests
-module.exports.MODELS = MODELS; module.exports.INSTRUCT = INSTRUCT; module.exports.ticket = ticket; module.exports.unticket = unticket;
+module.exports.MODELS = MODELS; module.exports.INSTRUCT = INSTRUCT; module.exports.FAITHFUL = FAITHFUL; module.exports.ticket = ticket; module.exports.unticket = unticket;
