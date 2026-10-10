@@ -32,13 +32,18 @@ r=await call(h,'GET','/api/render'); ok('status ok', r.json.ok===true && r.json.
 falCalls=[]; r=await call(h,'POST','/api/render',view,{origin:'https://ridgeline.test'});
 const sub=falCalls[0]; ok('submits to nano banana pro', r.code===200 && sub && sub.url==='https://queue.fal.run/fal-ai/nano-banana-pro/edit' && sub.auth==='Key k-test', {r:r.json, sub:sub&&sub.url});
 ok('sends render, outline and depth', sub && sub.body.image_urls.length===3 && sub.body.image_urls[0]===IMG && sub.body.image_urls[1]===PNG && sub.body.aspect_ratio==='16:9' && sub.body.resolution==='2K', sub&&Object.keys(sub.body));
-ok('prompt keeps the scene', sub && /Do not add, remove, move/.test(sub.body.prompt) && /great room on the main level/.test(sub.body.prompt), sub&&sub.body.prompt.slice(0,80));
+ok('prompt keeps the scene', sub && /Do not add, remove or rearrange/.test(sub.body.prompt) && /^Turn this 3D render/.test(sub.body.prompt) && /great room on the main level/.test(sub.body.prompt), sub&&sub.body.prompt.slice(0,80));
 const job=r.json.job; ok('signed ticket', typeof job==='string' && job.split('.').length===2 && r.json.left===1, r.json);
 r=await call(h,'GET','/api/render?job='+encodeURIComponent(job)); ok('poll: working', r.json.status==='working', r.json);
 ok('poll uses owner/app path', falCalls.some(c=>c.url==='https://queue.fal.run/fal-ai/nano-banana-pro/requests/req-123/status'), falCalls.map(c=>c.url));
 falState.done=true; r=await call(h,'GET','/api/render?job='+encodeURIComponent(job)); ok('poll: done with photo', r.json.status==='done' && r.json.image==='https://v3.fal.media/files/photo.jpg' && r.json.w===2048, r.json);
 r=await call(h,'GET','/api/render?get=1&job='+encodeURIComponent(job)); ok('hands over the photo', r.code===200 && r.headers['content-type']==='image/jpeg' && r.body.length===5000, {code:r.code, ct:r.headers['content-type']});
 r=await call(h,'GET','/api/render?job='+encodeURIComponent(job.replace(/.$/, c=>c==='A'?'B':'A'))); ok('forged ticket refused', r.code===400, r.json);
+// a prompt of your own from the environment, with the scene filled in
+h=load({ FAL_KEY:'k', RENDER_PROMPT:'Make it a photo. Scene: {scene}. Again: {scene}' }); falCalls=[]; r=await call(h,'POST','/api/render',view);
+ok('own prompt from RENDER_PROMPT', r.code===200 && falCalls[0].body.prompt==='Make it a photo. Scene: '+view.scene+'. Again: '+view.scene, falCalls[0]&&falCalls[0].body.prompt);
+h=load({ FAL_KEY:'k-test', RENDER_SECRET:'s', RENDER_DAILY_PER_VISITOR:'2', RENDER_DAILY_TOTAL:'3', RENDER_MONTHLY_BUDGET:'0.40' });
+await call(h,'POST','/api/render',view);
 // 3. limits: 2 per visitor, 3 a day, $0.40 a month at $0.15 each
 r=await call(h,'POST','/api/render',view); ok('second render allowed', r.code===200, r.json);
 r=await call(h,'POST','/api/render',view); ok('visitor limit', r.code===429 && /daily limit/.test(r.json.error), r.json);
